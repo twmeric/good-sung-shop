@@ -1933,16 +1933,25 @@ app.delete("/api/admin/users/:id", authMiddleware(["super_admin"]), async (c) =>
 });
 
 // POST /api/admin/users/send-credentials
-// Reset passwords and send login credentials via WhatsApp to all admin/supplier users
+// Reset passwords and send login credentials via WhatsApp to selected admin/supplier users
+// Body: { userIds: number[] }
 app.post("/api/admin/users/send-credentials", authMiddleware(["super_admin"]), async (c) => {
   try {
+    const body = await c.req.json();
+    const userIds = body.userIds;
+    if (!Array.isArray(userIds) || userIds.length === 0) {
+      return jsonResponse({ error: "Please select at least one user" }, 400);
+    }
+
+    // Build placeholders for IN clause
+    const placeholders = userIds.map(() => "?").join(",");
     const { results } = await c.env.DB.prepare(
-      `SELECT id, username, role, display_name, phone FROM admin_users WHERE role IN ('admin', 'supplier') AND phone IS NOT NULL AND phone != '' AND is_active = 1`
-    ).all();
+      `SELECT id, username, role, display_name, phone FROM admin_users WHERE id IN (${placeholders}) AND role IN ('admin', 'supplier') AND phone IS NOT NULL AND phone != '' AND is_active = 1`
+    ).bind(...userIds).all();
 
     const users = results || [];
     if (users.length === 0) {
-      return jsonResponse({ error: "No admin/supplier users with phone found" }, 404);
+      return jsonResponse({ error: "No valid users found with phone" }, 404);
     }
 
     const now = Math.floor(Date.now() / 1000);

@@ -49,6 +49,9 @@ const AdminUsers: React.FC = () => {
   const [editData, setEditData] = useState<Partial<AdminUserItem>>({});
   const [resetPasswordId, setResetPasswordId] = useState<number | null>(null);
   const [newPassword, setNewPassword] = useState('');
+  const [showSendModal, setShowSendModal] = useState(false);
+  const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
+  const [sendLoading, setSendLoading] = useState(false);
 
   const token = localStorage.getItem('admin_token');
 
@@ -239,24 +242,7 @@ const AdminUsers: React.FC = () => {
             {showForm ? '取消' : '新增管理員'}
           </button>
           <button
-            onClick={async () => {
-              if (!confirm('確定要重置所有 admin/supplier 的密碼並發送到 WhatsApp 嗎？')) return;
-              try {
-                const res = await fetch(`${API_BASE}/api/admin/users/send-credentials`, {
-                  method: 'POST',
-                  headers: { Authorization: `Bearer ${token}` },
-                });
-                const data = await res.json();
-                if (res.ok) {
-                  setSuccess(`已發送 ${data.sent}/${data.total} 位用戶的登入資料`);
-                  setTimeout(() => setSuccess(null), 5000);
-                } else {
-                  setError(data.error || '發送失敗');
-                }
-              } catch (e) {
-                setError('發送失敗');
-              }
-            }}
+            onClick={() => { setShowSendModal(true); setSelectedUserIds([]); }}
             className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
           >
             <MessageCircle className="w-5 h-5 mr-2" />
@@ -463,6 +449,119 @@ const AdminUsers: React.FC = () => {
                 >
                   確認重置
                 </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Send Credentials Modal */}
+        {showSendModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-lg w-full">
+              <h3 className="text-lg font-bold mb-4 dark:text-white">選擇發送對象</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                勾選要發送登入資料的用戶（只顯示有 WhatsApp 號碼的 admin/supplier）
+              </p>
+
+              <div className="mb-4 flex gap-2">
+                <button
+                  onClick={() => setSelectedUserIds(users.filter(u => (u.role === 'admin' || u.role === 'supplier') && u.phone).map(u => u.id))}
+                  className="text-xs px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
+                >
+                  全選
+                </button>
+                <button
+                  onClick={() => setSelectedUserIds([])}
+                  className="text-xs px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
+                >
+                  取消全選
+                </button>
+              </div>
+
+              <div className="max-h-64 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-lg mb-4">
+                {users.filter(u => u.role === 'admin' || u.role === 'supplier').map(user => (
+                  <label
+                    key={user.id}
+                    className={`flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 ${!user.phone ? 'opacity-50' : ''}`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedUserIds.includes(user.id)}
+                      onChange={e => {
+                        if (e.target.checked) {
+                          setSelectedUserIds(prev => [...prev, user.id]);
+                        } else {
+                          setSelectedUserIds(prev => prev.filter(id => id !== user.id));
+                        }
+                      }}
+                      disabled={!user.phone}
+                      className="w-4 h-4"
+                    />
+                    <div className="flex-1">
+                      <div className="text-sm font-medium dark:text-white">
+                        {user.display_name || user.username}
+                        <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">({user.username})</span>
+                      </div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">
+                        {roleLabels[user.role]} {user.phone ? `• ${user.phone}` : '• 無 WhatsApp'}
+                      </div>
+                    </div>
+                  </label>
+                ))}
+                {users.filter(u => u.role === 'admin' || u.role === 'supplier').length === 0 && (
+                  <div className="px-4 py-8 text-center text-gray-500 dark:text-gray-400 text-sm">沒有 admin/supplier 用戶</div>
+                )}
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  已選擇 {selectedUserIds.length} 位
+                </span>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => { setShowSendModal(false); setSelectedUserIds([]); }}
+                    className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600"
+                  >
+                    取消
+                  </button>
+                  <button
+                    onClick={async () => {
+                      if (selectedUserIds.length === 0) {
+                        setError('請至少選擇一位用戶');
+                        return;
+                      }
+                      if (!confirm(`確定要重置 ${selectedUserIds.length} 位用戶的密碼並發送到 WhatsApp 嗎？`)) return;
+                      setSendLoading(true);
+                      try {
+                        const res = await fetch(`${API_BASE}/api/admin/users/send-credentials`, {
+                          method: 'POST',
+                          headers: {
+                            'Content-Type': 'application/json',
+                            Authorization: `Bearer ${token}`,
+                          },
+                          body: JSON.stringify({ userIds: selectedUserIds }),
+                        });
+                        const data = await res.json();
+                        if (res.ok) {
+                          setSuccess(`已發送 ${data.sent}/${data.total} 位用戶的登入資料`);
+                          setShowSendModal(false);
+                          setSelectedUserIds([]);
+                          setTimeout(() => setSuccess(null), 5000);
+                        } else {
+                          setError(data.error || '發送失敗');
+                        }
+                      } catch (e) {
+                        setError('發送失敗');
+                      } finally {
+                        setSendLoading(false);
+                      }
+                    }}
+                    disabled={sendLoading || selectedUserIds.length === 0}
+                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-green-400 disabled:cursor-not-allowed"
+                  >
+                    {sendLoading ? '發送中...' : '確認發送'}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
