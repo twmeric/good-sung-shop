@@ -40,6 +40,22 @@ const corsConfig = {
 // ============================================================
 // Utilities
 // ============================================================
+
+/**
+ * Convert snake_case object keys to camelCase.
+ * Used because D1 returns snake_case column names but frontend expects camelCase.
+ */
+function snakeToCamel(obj: any): any {
+  if (obj === null || typeof obj !== "object") return obj;
+  if (Array.isArray(obj)) return obj.map(snakeToCamel);
+  const result: any = {};
+  for (const [key, value] of Object.entries(obj)) {
+    const camelKey = key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
+    result[camelKey] = snakeToCamel(value);
+  }
+  return result;
+}
+
 function jsonResponse(data: any, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
@@ -854,7 +870,7 @@ app.get("/api/public/admin/orders", authMiddleware(), async (c) => {
     const { results } = await c.env.DB.prepare(
       `SELECT * FROM order_records ORDER BY created_at DESC`
     ).all();
-    return jsonResponse(results || []);
+    return jsonResponse((results || []).map(snakeToCamel));
   } catch (e) {
     return jsonResponse({ error: "Failed to fetch orders" }, 500);
   }
@@ -869,7 +885,7 @@ app.get("/api/public/admin/orders/:id", authMiddleware(), async (c) => {
       .bind(id)
       .first();
     if (!row) return jsonResponse({ error: "Order not found" }, 404);
-    return jsonResponse(row);
+    return jsonResponse(snakeToCamel(row));
   } catch (e) {
     return jsonResponse({ error: "Failed to fetch order" }, 500);
   }
