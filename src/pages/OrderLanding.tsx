@@ -557,7 +557,7 @@ const OrderLanding: React.FC = () => {
 
       if (res.ok) {
         const data = await res.json();
-        const orderNum = String(data.createdAt).slice(-4);
+        const orderNum = (data.orderNum || "-");
         navigate(`/order/success?orderId=${data.id}&orderNum=${orderNum}&total=${cartTotal}&lang=zh`);
       } else {
         const errorData = await res.json().catch(() => ({}));

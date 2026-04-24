@@ -166,7 +166,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPage, onLogo
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden bg-gray-100 dark:bg-gray-900 transition-colors">
+      <div className="flex-1 flex flex-col overflow-hidden bg-gray-100 dark:bg-gray-900 dark:text-gray-300 transition-colors">
         {/* Top Bar */}
         <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm px-6 py-4 flex items-center justify-between transition-colors">
           <div className="flex-1">

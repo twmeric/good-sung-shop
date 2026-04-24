@@ -170,7 +170,7 @@ const AdminOrderDetail: React.FC = () => {
           <ArrowLeft className="w-4 h-4" /> 返回訂單列表
         </button>
         <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-bold text-gray-800 dark:text-white">訂單 #{String(order.createdAt).slice(-4)}</h1>
+          <h1 className="text-2xl font-bold text-gray-800 dark:text-white">訂單 #{(order.orderNum || "-")}</h1>
           {order.orderCompleted === 1 ? (
             <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">訂單完成</span>
           ) : order.paymentConfirmed === 1 ? (

@@ -223,7 +223,7 @@ const AdminDashboard: React.FC = () => {
                 >
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-700 font-bold text-sm">
-                      {String(order.createdAt).slice(-4)}
+                      {(order.orderNum || "-")}
                     </div>
                     <div>
                       <div className="font-medium text-gray-800 dark:text-gray-300">{order.name}</div>

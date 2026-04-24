@@ -157,7 +157,7 @@ const AdminOrders: React.FC = () => {
       } catch { /* ignore */ }
 
       const baseRow = [
-        order.orderNum || String(order.createdAt).slice(-4),
+        order.orderNum || (order.orderNum || "-"),
         new Date(order.createdAt * 1000).toLocaleDateString('zh-HK'),
         order.name,
         order.phone,
@@ -186,7 +186,7 @@ const AdminOrders: React.FC = () => {
   };
 
   const filteredOrders = orders.filter(order => {
-    const orderNum = String(order.createdAt).slice(-4);
+    const orderNum = (order.orderNum || "-");
     const searchLower = filters.searchTerm.toLowerCase();
     const deliveryDateMatch = !filters.deliveryDateStart && !filters.deliveryDateEnd || (
       order.deliveryDate &&
@@ -309,7 +309,7 @@ const AdminOrders: React.FC = () => {
               return (
                 <tr key={order.id} className="hover:bg-orange-50 dark:hover:bg-gray-700 transition-colors">
                   <td className="p-4 text-sm text-gray-600 dark:text-gray-400">{order.id}</td>
-                  <td className="p-4 font-mono font-bold text-orange-600 text-sm">{String(order.createdAt).slice(-4)}</td>
+                  <td className="p-4 font-mono font-bold text-orange-600 text-sm">{(order.orderNum || "-")}</td>
                   <td className="p-4 text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">{new Date(order.createdAt * 1000).toLocaleDateString('zh-HK')}</td>
                   <td className="p-4 text-sm font-medium text-gray-800 dark:text-gray-300">{order.name}</td>
                   <td className="p-4 text-sm text-gray-600 dark:text-gray-400">{order.phone}</td>
