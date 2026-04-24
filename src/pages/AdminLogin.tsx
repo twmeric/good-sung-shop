@@ -75,7 +75,7 @@ const AdminLogin: React.FC = () => {
           <input
             className="w-full p-4 text-xl border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none dark:bg-gray-800 dark:text-white"
             type="password"
-            placeholder="admin360"
+            placeholder="輸入密碼"
             value={password}
             onChange={e => setPassword(e.target.value)}
             disabled={loading}
@@ -90,8 +90,6 @@ const AdminLogin: React.FC = () => {
         </button>
 
         <div className="mt-4 text-center text-sm text-gray-400 dark:text-gray-500">
-          <p>預設帳號：superadmin / superadmin360</p>
-          <p>admin / admin360 | supplier / supplier360</p>
         </div>
       </form>
     </div>
