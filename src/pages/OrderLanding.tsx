@@ -965,7 +965,6 @@ const OrderLanding: React.FC = () => {
           <div className="max-w-4xl mx-auto">
             <div className="flex items-center gap-3 mb-8">
               <div className="w-12 h-12 bg-brand-600 rounded-full flex items-center justify-center text-white text-xl font-bold">5</div>
-              <h3 className="text-huge font-bold text-gray-800">WhatsApp 身份驗證</h3>
             </div>
 
             {isVerified ? (
@@ -993,10 +992,6 @@ const OrderLanding: React.FC = () => {
               <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8">
                 <div className="text-center mb-8">
                   <MessageCircle size={64} className="text-brand-600 mx-auto mb-4" />
-                  <h4 className="text-xxxl font-bold text-gray-800 mb-3">通過 WhatsApp 驗證身份</h4>
-                  <p className="text-xl text-gray-600 leading-relaxed">
-                    系統會自動確認您的身份，無需輸入電話號碼。
-                  </p>
                 </div>
 
                 {verifyPolling && (
@@ -1044,26 +1039,10 @@ const OrderLanding: React.FC = () => {
                   className="w-full bg-green-600 text-white text-xxl font-bold py-5 rounded-xl hover:bg-green-700 shadow-lg disabled:opacity-60 flex items-center justify-center gap-3"
                 >
                   <MessageCircle size={28} />
-                  {verifyPolling ? '等待驗證中...' : '打開 WhatsApp 發送驗證'}
+                  {verifyPolling ? '等待驗證中...' : '打開 WhatsApp 發送'}
                 </button>
 
-                <p className="text-lg text-gray-500 text-center mt-4">
-                  點擊後會自動打開 WhatsApp，只需按「發送」即可
-                </p>
-
                 <div className="mt-6 space-y-3 text-center">
-                  <button
-                    onClick={() => { setDeepLinkFailed(true); }}
-                    className="block w-full text-lg text-gray-500 underline hover:text-brand-600"
-                  >
-                    WhatsApp 沒有自動打開？手動發送
-                  </button>
-                  <button
-                    onClick={() => { setUseOtpMode(true); setVerifyError(''); setDeepLinkFailed(false); }}
-                    className="block w-full text-lg text-gray-500 underline hover:text-brand-600"
-                  >
-                    改用簡訊驗證（無需打開 WhatsApp）
-                  </button>
                 </div>
               </div>
             ) : (
