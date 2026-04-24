@@ -963,9 +963,7 @@ const OrderLanding: React.FC = () => {
       {step === 'verify' && (
         <section className="py-10 px-4">
           <div className="max-w-4xl mx-auto">
-            <div className="flex items-center gap-3 mb-8">
-              <div className="w-12 h-12 bg-brand-600 rounded-full flex items-center justify-center text-white text-xl font-bold">5</div>
-            </div>
+            <div className="mb-8"></div>
 
             {isVerified ? (
               <div className="bg-green-50 border-2 border-green-300 rounded-2xl p-8 text-center">
