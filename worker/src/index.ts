@@ -1545,7 +1545,35 @@ app.get("/api/public/admin/scenarios/:key", async (c) => {
       .bind(key)
       .first();
     if (!row) return jsonResponse({ error: "Not found" }, 404);
-    return jsonResponse(row);
+    // Parse config_json for frontend
+    const result = snakeToCamel(row);
+    try {
+      result.config = JSON.parse(row.config_json || '{}');
+    } catch {
+      result.config = {};
+    }
+    return jsonResponse(result);
+  } catch (e) {
+    return jsonResponse({ error: "Failed" }, 500);
+  }
+});
+
+// Public: Campaign config (for landing page)
+app.get("/api/public/campaigns/:key", async (c) => {
+  try {
+    const key = c.req.param("key");
+    const row = await c.env.DB.prepare(
+      `SELECT scenario_key, name, config_json, is_active FROM campaigns WHERE scenario_key = ?`
+    ).bind(key).first();
+    if (!row) return jsonResponse({ error: "Not found" }, 404);
+    if (row.is_active !== 1) return jsonResponse({ error: "Campaign inactive" }, 403);
+    let config = {};
+    try { config = JSON.parse(row.config_json || '{}'); } catch { /* ignore */ }
+    return jsonResponse({
+      scenarioKey: row.scenario_key,
+      name: row.name,
+      config,
+    });
   } catch (e) {
     return jsonResponse({ error: "Failed" }, 500);
   }

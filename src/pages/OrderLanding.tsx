@@ -119,6 +119,7 @@ function generateVerificationCode(): string {
 const OrderLanding: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const scenarioKey = searchParams.get('scenarioKey') || '';
 
   // ── Step management ──
   const [step, setStep] = useState<'package' | 'dishes' | 'cart' | 'delivery' | 'verify' | 'submitting'>('package');
@@ -155,6 +156,9 @@ const OrderLanding: React.FC = () => {
   const [deepLinkFailed, setDeepLinkFailed] = useState(false);
   const [copied, setCopied] = useState(false);
 
+  // ── Campaign config ──
+  const [campaignConfig, setCampaignConfig] = useState<any>(null);
+
   // ── Submit ──
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
@@ -184,6 +188,20 @@ const OrderLanding: React.FC = () => {
       } catch { /* ignore */ }
     }
   }, []);
+
+  // Fetch campaign config
+  useEffect(() => {
+    if (scenarioKey) {
+      fetch(`${API_BASE}/api/public/campaigns/${scenarioKey}`)
+        .then(r => r.ok ? r.json() : null)
+        .then(data => {
+          if (data && data.config) {
+            setCampaignConfig(data.config);
+          }
+        })
+        .catch(() => { /* ignore */ });
+    }
+  }, [scenarioKey]);
 
   // Fetch products from API
   useEffect(() => {
@@ -562,7 +580,9 @@ const OrderLanding: React.FC = () => {
         <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img src={logoImg} alt="好餸社企" className="h-12 w-auto rounded-lg" />
-            <span className="text-xxxl font-bold text-brand-600">新鮮餸菜包</span>
+            <span className="text-xxxl font-bold text-brand-600">
+              {campaignConfig?.landingPageConfig?.title || '新鮮餸菜包'}
+            </span>
           </div>
           {cart.length > 0 && (
             <div className="flex items-center gap-2 bg-brand-100 px-4 py-2 rounded-full">
@@ -578,8 +598,9 @@ const OrderLanding: React.FC = () => {
         <section className="bg-brand-600 text-white py-6 px-4">
           <div className="max-w-4xl mx-auto text-center">
             <p className="text-xxl leading-relaxed opacity-95">
-              支持 SEN 青年就業<br />
-              每日新鮮製作
+              {campaignConfig?.landingPageConfig?.description || (
+                <>支持 SEN 青年就業<br />每日新鮮製作</>
+              )}
             </p>
           </div>
         </section>

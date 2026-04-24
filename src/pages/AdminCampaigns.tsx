@@ -64,10 +64,10 @@ const AdminCampaigns: React.FC = () => {
         localStorage.removeItem('admin_token');
         navigate('/admin');
       } else {
-        setError('Failed to load campaigns');
+        setError('載入活動失敗');
       }
     } catch (e: any) {
-      setError(e.message || 'Error loading campaigns');
+      setError(e.message || '載入活動出錯');
     } finally {
       setLoading(false);
     }
@@ -87,7 +87,7 @@ const AdminCampaigns: React.FC = () => {
 
   const handleSave = async () => {
     if (!formData.scenarioKey || !formData.name) {
-      setError('Please fill in all required fields');
+      setError('請填寫所有必填項目');
       return;
     }
 
@@ -102,35 +102,35 @@ const AdminCampaigns: React.FC = () => {
     });
 
     if (res.ok) {
-      setSuccess(editingId ? 'Campaign updated successfully' : 'Campaign created successfully');
+      setSuccess(editingId ? '活動更新成功' : '活動創建成功');
       setShowForm(false);
       fetchCampaigns();
       setTimeout(() => setSuccess(null), 3000);
     } else {
       const errorData = await res.json();
-      setError(errorData.error || 'Failed to save campaign');
+      setError(errorData.error || '儲存活動失敗');
     }
   };
 
   const handleDelete = async (scenarioKey: string) => {
-    if (!confirm('Confirm delete?')) return;
+    if (!confirm('確定要刪除嗎？')) return;
 
     const res = await apiFetch(`/api/public/admin/scenarios/${scenarioKey}`, {
       method: 'DELETE'
     });
 
     if (res.ok) {
-      setSuccess('Campaign deleted successfully');
+      setSuccess('活動刪除成功');
       fetchCampaigns();
       setTimeout(() => setSuccess(null), 3000);
     } else {
       const errorData = await res.json();
-      setError(errorData.error || 'Failed to delete campaign');
+      setError(errorData.error || '刪除活動失敗');
     }
   };
 
   const handleLogout = () => {
-    if (confirm('Confirm logout?')) {
+    if (confirm('確定要登出嗎？')) {
       localStorage.removeItem('admin_token');
       navigate('/admin');
     }
@@ -168,7 +168,7 @@ const AdminCampaigns: React.FC = () => {
         setTemplates(Array.isArray(data) ? data : (data.templates || []));
       }
     } catch (e) {
-      console.error('Error loading templates:', e);
+      console.error('載入模板出錯:', e);
     }
   };
 
@@ -180,7 +180,7 @@ const AdminCampaigns: React.FC = () => {
 
   const handleSaveTemplate = async () => {
     if (!templateFormData.messageKey || !templateFormData.messageContent) {
-      setError('Please fill in all template fields');
+      setError('請填寫所有模板欄位');
       return;
     }
 
@@ -200,25 +200,25 @@ const AdminCampaigns: React.FC = () => {
     });
 
     if (res.ok) {
-      setSuccess('Template saved successfully');
+      setSuccess('模板儲存成功');
       setShowTemplateForm(false);
       fetchTemplates();
       setTimeout(() => setSuccess(null), 3000);
     } else {
       const errorData = await res.json();
-      setError(errorData.error || 'Failed to save template');
+      setError(errorData.error || '儲存模板失敗');
     }
   };
 
   const handleDeleteTemplate = async (id: number) => {
-    if (!confirm('Confirm delete?')) return;
+    if (!confirm('確定要刪除嗎？')) return;
 
     const res = await apiFetch(`/api/public/admin/whatsapp/templates/${id}`, {
       method: 'DELETE'
     });
 
     if (res.ok) {
-      setSuccess('Template deleted successfully');
+      setSuccess('模板刪除成功');
       fetchTemplates();
       setTimeout(() => setSuccess(null), 3000);
     }
@@ -235,7 +235,7 @@ const AdminCampaigns: React.FC = () => {
         setPreviewData(data);
       }
     } catch (e) {
-      console.error('Error previewing template:', e);
+      console.error('預覽模板出錯:', e);
     }
   };
 
@@ -266,7 +266,7 @@ const AdminCampaigns: React.FC = () => {
 
         {/* Tabs */}
         <div className="bg-white border-b mb-6 rounded-t-lg">
-          <nav className="flex space-x-8 px-6" aria-label="Tabs">
+          <nav className="flex space-x-8 px-6" aria-label="分頁">
             <button
               onClick={() => { setActiveTab('campaigns'); setSelectedScenario(null); }}
               className={`py-4 px-1 border-b-2 font-medium text-sm ${
@@ -275,7 +275,7 @@ const AdminCampaigns: React.FC = () => {
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
-              Campaigns
+              活動管理
             </button>
             {selectedScenario && (
               <button
@@ -286,7 +286,7 @@ const AdminCampaigns: React.FC = () => {
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
-                Templates: {selectedScenario}
+                訊息模板: {selectedScenario}
               </button>
             )}
           </nav>
@@ -302,15 +302,15 @@ const AdminCampaigns: React.FC = () => {
                 className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
               >
                 <Plus className="w-5 h-5 mr-2" />
-                New Campaign
+                新增活動
               </button>
             </div>
 
             {/* Campaigns List */}
             {loading ? (
-              <div className="bg-white rounded shadow p-8 text-center text-gray-500">Loading...</div>
+              <div className="bg-white rounded shadow p-8 text-center text-gray-500">加載中...</div>
             ) : campaigns.length === 0 ? (
-              <div className="bg-white rounded shadow p-8 text-center text-gray-500">No campaigns yet</div>
+              <div className="bg-white rounded shadow p-8 text-center text-gray-500">暫無活動</div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {campaigns.map(campaign => (
@@ -318,7 +318,18 @@ const AdminCampaigns: React.FC = () => {
                     <div className="mb-4">
                       <h3 className="text-lg font-bold text-gray-900">{campaign.name}</h3>
                       <p className="text-sm text-gray-600 font-mono">{campaign.scenarioKey}</p>
-                      <p className="text-xs text-gray-500 mt-2">Language: {campaign.defaultLang.toUpperCase()}</p>
+                      <p className="text-xs text-gray-500 mt-2">語言：{campaign.defaultLang.toUpperCase()}</p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        推廣連結：{' '}
+                        <a
+                          href={`https://goodstore.jkdcoding.com/?scenarioKey=${campaign.scenarioKey}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:underline break-all"
+                        >
+                          https://goodstore.jkdcoding.com/?scenarioKey={campaign.scenarioKey}
+                        </a>
+                      </p>
                     </div>
                     <div className="flex gap-2">
                       <button
@@ -328,25 +339,25 @@ const AdminCampaigns: React.FC = () => {
                         }}
                         className="flex-1 flex items-center justify-center px-3 py-2 bg-purple-500 text-white rounded hover:bg-purple-600 text-sm"
                       >
-                        <Eye className="w-4 h-4 mr-1" /> Templates
+                        <Eye className="w-4 h-4 mr-1" /> 訊息模板
                       </button>
                       <button
                         onClick={() => handleEdit(campaign)}
                         className="flex-1 flex items-center justify-center px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm"
                       >
-                        <Edit2 className="w-4 h-4 mr-1" /> Edit
+                        <Edit2 className="w-4 h-4 mr-1" /> 編輯
                       </button>
                       <button
                         onClick={() => navigate(`/admin/campaigns/${campaign.scenarioKey}/settings`)}
                         className="flex-1 flex items-center justify-center px-3 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-600 text-sm"
                       >
-                        ⚙️ Settings
+                        ⚙️ 設置
                       </button>
                       <button
                         onClick={() => handleDelete(campaign.scenarioKey)}
                         className="flex-1 flex items-center justify-center px-3 py-2 bg-red-500 text-white rounded hover:bg-red-600 text-sm"
                       >
-                        <Trash2 className="w-4 h-4 mr-1" /> Delete
+                        <Trash2 className="w-4 h-4 mr-1" /> 刪除
                       </button>
                     </div>
                   </div>
@@ -365,7 +376,7 @@ const AdminCampaigns: React.FC = () => {
                 className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
               >
                 <Plus className="w-5 h-5 mr-2" />
-                New Template
+                新增模板
               </button>
             </div>
 
@@ -376,7 +387,7 @@ const AdminCampaigns: React.FC = () => {
                 onChange={e => setSelectedFilter(e.target.value)}
                 className="px-4 py-2 border border-gray-300 rounded-lg"
               >
-                <option value="all">All Templates</option>
+                <option value="all">所有模板</option>
                 {Array.from(new Set(templates.map(t => t.messageKey))).map(key => (
                   <option key={key} value={key}>{key}</option>
                 ))}
@@ -386,7 +397,7 @@ const AdminCampaigns: React.FC = () => {
             {/* Templates Grid */}
             <div className="space-y-4">
               {filteredTemplates.length === 0 ? (
-                <div className="bg-white rounded shadow p-8 text-center text-gray-500">No templates</div>
+                <div className="bg-white rounded shadow p-8 text-center text-gray-500">暫無模板</div>
               ) : (
                 filteredTemplates.map(template => (
                   <div key={template.id} className="bg-white rounded-lg shadow p-6 border-l-4 border-purple-500">
@@ -399,7 +410,7 @@ const AdminCampaigns: React.FC = () => {
                         onClick={() => handlePreviewTemplate(template.id)}
                         className="flex-1 px-3 py-2 bg-green-500 text-white rounded hover:bg-green-600 text-sm"
                       >
-                        <Eye className="w-4 h-4 inline mr-1" /> Preview
+                        <Eye className="w-4 h-4 inline mr-1" /> 預覽
                       </button>
                       <button
                         onClick={() => {
@@ -409,13 +420,13 @@ const AdminCampaigns: React.FC = () => {
                         }}
                         className="flex-1 px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm"
                       >
-                        <Edit2 className="w-4 h-4 inline mr-1" /> Edit
+                        <Edit2 className="w-4 h-4 inline mr-1" /> 編輯
                       </button>
                       <button
                         onClick={() => handleDeleteTemplate(template.id)}
                         className="flex-1 px-3 py-2 bg-red-500 text-white rounded hover:bg-red-600 text-sm"
                       >
-                        <Trash2 className="w-4 h-4 inline mr-1" /> Delete
+                        <Trash2 className="w-4 h-4 inline mr-1" /> 刪除
                       </button>
                     </div>
                   </div>
@@ -429,38 +440,38 @@ const AdminCampaigns: React.FC = () => {
         {showForm && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg p-6 max-w-md w-full">
-              <h2 className="text-2xl font-bold mb-4">{editingId ? 'Edit Campaign' : 'New Campaign'}</h2>
+              <h2 className="text-2xl font-bold mb-4">{editingId ? '編輯活動' : '新增活動'}</h2>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Campaign Key</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">活動識別碼</label>
                   <input
                     type="text"
                     disabled={!!editingId}
-                    placeholder="campaign_key"
+                    placeholder="活動識別碼"
                     value={formData.scenarioKey}
                     onChange={e => setFormData({ ...formData, scenarioKey: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Campaign Name</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">活動名稱</label>
                   <input
                     type="text"
-                    placeholder="Campaign Display Name"
+                    placeholder="活動顯示名稱"
                     value={formData.name}
                     onChange={e => setFormData({ ...formData, name: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Default Language</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">預設語言</label>
                   <select
                     value={formData.defaultLang}
                     onChange={e => setFormData({ ...formData, defaultLang: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                   >
-                    <option value="zh">Chinese (中文)</option>
-                    <option value="en">English</option>
+                    <option value="zh">中文</option>
+                    <option value="en">英文</option>
                   </select>
                 </div>
               </div>
@@ -469,13 +480,13 @@ const AdminCampaigns: React.FC = () => {
                   onClick={() => setShowForm(false)}
                   className="flex-1 px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300"
                 >
-                  Cancel
+                  取消
                 </button>
                 <button
                   onClick={handleSave}
                   className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                 >
-                  Save
+                  儲存
                 </button>
               </div>
             </div>
@@ -486,22 +497,22 @@ const AdminCampaigns: React.FC = () => {
         {showTemplateForm && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg p-6 max-w-md w-full">
-              <h2 className="text-2xl font-bold mb-4">{editingTemplateId ? 'Edit Template' : 'New Template'}</h2>
+              <h2 className="text-2xl font-bold mb-4">{editingTemplateId ? '編輯模板' : '新增模板'}</h2>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Message Key</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">模板識別碼</label>
                   <input
                     type="text"
-                    placeholder="order_confirmation"
+                    placeholder="模板識別碼"
                     value={templateFormData.messageKey}
                     onChange={e => setTemplateFormData({ ...templateFormData, messageKey: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Message Content</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">模板內容</label>
                   <textarea
-                    placeholder="Your message content..."
+                    placeholder="輸入模板內容..."
                     rows={6}
                     value={templateFormData.messageContent}
                     onChange={e => setTemplateFormData({ ...templateFormData, messageContent: e.target.value })}
@@ -514,13 +525,13 @@ const AdminCampaigns: React.FC = () => {
                   onClick={() => setShowTemplateForm(false)}
                   className="flex-1 px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300"
                 >
-                  Cancel
+                  取消
                 </button>
                 <button
                   onClick={handleSaveTemplate}
                   className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                 >
-                  Save
+                  儲存
                 </button>
               </div>
             </div>
@@ -530,8 +541,8 @@ const AdminCampaigns: React.FC = () => {
         {/* Preview Modal */}
         {previewData && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg p-6 max-w-md w-full">
-              <h2 className="text-2xl font-bold mb-4">Template Preview</h2>
+            <div className="bg-white rounded-lg p-6 max-w-md w-full relative">
+              <h2 className="text-2xl font-bold mb-4">模板預覽</h2>
               <button
                 onClick={() => setPreviewData(null)}
                 className="absolute top-4 right-4 text-gray-600 hover:text-gray-900"
@@ -547,7 +558,7 @@ const AdminCampaigns: React.FC = () => {
                 onClick={() => setPreviewData(null)}
                 className="w-full mt-4 px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300"
               >
-                Close
+                關閉
               </button>
             </div>
           </div>

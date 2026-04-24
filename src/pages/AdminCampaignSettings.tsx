@@ -57,7 +57,7 @@ const AdminCampaignSettings: React.FC = () => {
       title: '',
       description: '',
       heroImage: '',
-      ctaButtonText: 'Order Now',
+      ctaButtonText: '立即訂購',
       ctaButtonColor: '#2563EB'
     },
     referralConfig: {
@@ -92,7 +92,7 @@ const AdminCampaignSettings: React.FC = () => {
           navigate('/admin');
           return;
         }
-        throw new Error('Failed to fetch campaign settings');
+        throw new Error('獲取活動設置失敗');
       }
 
       const data = await response.json();
@@ -108,7 +108,7 @@ const AdminCampaignSettings: React.FC = () => {
           title: '',
           description: '',
           heroImage: '',
-          ctaButtonText: 'Order Now',
+          ctaButtonText: '立即訂購',
           ctaButtonColor: '#2563EB'
         },
         referralConfig: config.referralConfig || {
@@ -121,7 +121,7 @@ const AdminCampaignSettings: React.FC = () => {
       });
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load campaign settings');
+      setError(err instanceof Error ? err.message : '載入活動設置失敗');
       console.error('Error fetching campaign settings:', err);
     } finally {
       setLoading(false);
@@ -167,11 +167,11 @@ const AdminCampaignSettings: React.FC = () => {
         throw new Error(data.error || `Server error: ${response.statusText}`);
       }
 
-      setSuccess('Campaign settings saved successfully!');
+      setSuccess('設置儲存成功');
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       console.error('Error saving settings:', err);
-      setError(err instanceof Error ? err.message : 'Failed to save campaign settings');
+      setError(err instanceof Error ? err.message : '儲存設置失敗');
     } finally {
       setSaving(false);
     }
@@ -189,7 +189,7 @@ const AdminCampaignSettings: React.FC = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-gray-600">Loading campaign settings...</div>
+        <div className="text-gray-600">加載中...</div>
       </div>
     );
   }
@@ -197,7 +197,7 @@ const AdminCampaignSettings: React.FC = () => {
   if (!campaign) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-red-600">Campaign not found</div>
+        <div className="text-red-600">找不到活動</div>
       </div>
     );
   }
@@ -206,9 +206,9 @@ const AdminCampaignSettings: React.FC = () => {
     <AdminLayout currentPage="campaigns" onLogout={handleLogout}>
       <div>
         <h2 className="text-2xl font-bold text-gray-900 mb-4">
-          Campaign Settings: {campaign.name}
+          活動設置：{campaign.name}
         </h2>
-        <p className="text-sm text-gray-500 mb-6">Scenario Key: {campaign.scenarioKey}</p>
+        <p className="text-sm text-gray-500 mb-6">場景鍵：{campaign.scenarioKey}</p>
 
         {/* Messages */}
         {error && (
@@ -244,9 +244,9 @@ const AdminCampaignSettings: React.FC = () => {
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
-                {tab === 'basic' && 'Basic Settings'}
-                {tab === 'landing' && 'Landing Page'}
-                {tab === 'referral' && 'Referral Program'}
+                {tab === 'basic' && '基本設置'}
+                {tab === 'landing' && '落地頁'}
+                {tab === 'referral' && '推薦計劃'}
               </button>
             ))}
           </nav>
@@ -256,33 +256,33 @@ const AdminCampaignSettings: React.FC = () => {
           {/* Basic Settings Tab */}
           {activeTab === 'basic' && (
             <div className="space-y-6">
-              <h2 className="text-xl font-bold text-gray-900">Campaign Basic Settings</h2>
+              <h2 className="text-xl font-bold text-gray-900">活動基本設置</h2>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Campaign Name
+                    活動名稱
                   </label>
                   <input
                     type="text"
                     value={settings.name}
                     onChange={(e) => setSettings({ ...settings, name: e.target.value })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Campaign Name"
+                    placeholder="活動名稱"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Default Language
+                    預設語言
                   </label>
                   <select
                     value={settings.defaultLang}
                     onChange={(e) => setSettings({ ...settings, defaultLang: e.target.value })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    <option value="zh">Chinese (中文)</option>
-                    <option value="en">English</option>
+                    <option value="zh">中文</option>
+                    <option value="en">英文</option>
                   </select>
                 </div>
               </div>
@@ -296,13 +296,13 @@ const AdminCampaignSettings: React.FC = () => {
                     className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
                   />
                   <span className="text-sm font-medium text-gray-700">
-                    Campaign is Active
+                    活動已啟用
                   </span>
                 </label>
                 <p className="text-sm text-gray-500 mt-2">
                   {settings.isActive
-                    ? 'This campaign is currently active and visible to customers.'
-                    : 'This campaign is inactive and not visible to customers.'}
+                    ? '此活動目前啟用中，客戶可見。'
+                    : '此活動已停用，客戶不可見。'}
                 </p>
               </div>
             </div>
@@ -311,11 +311,11 @@ const AdminCampaignSettings: React.FC = () => {
           {/* Landing Page Settings Tab */}
           {activeTab === 'landing' && (
             <div className="space-y-6">
-              <h2 className="text-xl font-bold text-gray-900">Landing Page Configuration</h2>
+              <h2 className="text-xl font-bold text-gray-900">落地頁配置</h2>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Page Title
+                  頁面標題
                 </label>
                 <input
                   type="text"
@@ -328,13 +328,13 @@ const AdminCampaignSettings: React.FC = () => {
                     }
                   })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="e.g., Good Sung Poon Choi"
+                  placeholder="例如：Good Sung Poon Choi"
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Page Description
+                  頁面描述
                 </label>
                 <textarea
                   value={settings.landingPageConfig.description}
@@ -347,14 +347,14 @@ const AdminCampaignSettings: React.FC = () => {
                   })}
                   rows={4}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Campaign description and details"
+                  placeholder="活動描述和詳情"
                 />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    CTA Button Text
+                    按鈕文字
                   </label>
                   <input
                     type="text"
@@ -367,13 +367,13 @@ const AdminCampaignSettings: React.FC = () => {
                       }
                     })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Order Now"
+                    placeholder="立即訂購"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    CTA Button Color
+                    按鈕顏色
                   </label>
                   <div className="flex items-center space-x-2">
                     <input
@@ -407,7 +407,7 @@ const AdminCampaignSettings: React.FC = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Hero Image URL
+                  主圖片 URL
                 </label>
                 <input
                   type="url"
@@ -422,7 +422,7 @@ const AdminCampaignSettings: React.FC = () => {
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="https://example.com/hero-image.jpg"
                 />
-                <p className="text-xs text-gray-500 mt-1">Optional: URL to hero/banner image</p>
+                <p className="text-xs text-gray-500 mt-1">可選：主圖/橫幅圖片 URL</p>
               </div>
             </div>
           )}
@@ -430,12 +430,12 @@ const AdminCampaignSettings: React.FC = () => {
           {/* Referral Settings Tab */}
           {activeTab === 'referral' && (
             <div className="space-y-6">
-              <h2 className="text-xl font-bold text-gray-900">Referral Program Configuration</h2>
+              <h2 className="text-xl font-bold text-gray-900">推薦計劃配置</h2>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Referral Code Prefix
+                    推薦碼前綴
                   </label>
                   <input
                     type="text"
@@ -451,12 +451,12 @@ const AdminCampaignSettings: React.FC = () => {
                     placeholder="REF"
                     maxLength={5}
                   />
-                  <p className="text-xs text-gray-500 mt-1">Prefix for generated referral codes</p>
+                  <p className="text-xs text-gray-500 mt-1">生成的推薦碼前綴</p>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Referral Reward Points (for referred customer)
+                    被推薦人積分
                   </label>
                   <input
                     type="number"
@@ -475,7 +475,7 @@ const AdminCampaignSettings: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Referrer Reward Points (for person who referred)
+                    推薦人積分
                   </label>
                   <input
                     type="number"
@@ -494,7 +494,7 @@ const AdminCampaignSettings: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Referral Discount Percentage (%)
+                    推薦折扣 %
                   </label>
                   <input
                     type="number"
@@ -514,7 +514,7 @@ const AdminCampaignSettings: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Minimum Order Amount for Referral (HKD)
+                    最低訂單金額（港幣）
                   </label>
                   <input
                     type="number"
@@ -533,13 +533,13 @@ const AdminCampaignSettings: React.FC = () => {
               </div>
 
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h3 className="font-medium text-blue-900 mb-2">Referral Program Summary</h3>
+                <h3 className="font-medium text-blue-900 mb-2">推薦計劃摘要</h3>
                 <ul className="space-y-1 text-sm text-blue-800">
-                  <li>• New referrals earn {settings.referralConfig.referralRewardPoints} reward points</li>
-                  <li>• Referrers earn {settings.referralConfig.referrerRewardPoints} reward points</li>
-                  <li>• Referral discount: {settings.referralConfig.referralDiscountPercentage}%</li>
-                  <li>• Minimum order: HKD {settings.referralConfig.minOrderAmountForReferral}</li>
-                  <li>• Referral code format: {settings.referralConfig.referralCodePrefix}XXXXX</li>
+                  <li>• 新被推薦人獲得 {settings.referralConfig.referralRewardPoints} 積分</li>
+                  <li>• 推薦人獲得 {settings.referralConfig.referrerRewardPoints} 積分</li>
+                  <li>• 推薦折扣：{settings.referralConfig.referralDiscountPercentage}%</li>
+                  <li>• 最低訂單：港幣 {settings.referralConfig.minOrderAmountForReferral}</li>
+                  <li>• 推薦碼格式：{settings.referralConfig.referralCodePrefix}XXXXX</li>
                 </ul>
               </div>
             </div>
@@ -552,7 +552,7 @@ const AdminCampaignSettings: React.FC = () => {
             onClick={() => navigate('/admin/campaigns')}
             className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium"
           >
-            Cancel
+            取消
           </button>
           <button
             onClick={handleSaveSettings}
@@ -560,7 +560,7 @@ const AdminCampaignSettings: React.FC = () => {
             className="flex items-center px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-400 font-medium"
           >
             <Save className="w-5 h-5 mr-2" />
-            {saving ? 'Saving...' : 'Save Settings'}
+            {saving ? '儲存中...' : '儲存設置'}
           </button>
         </div>
       </div>
