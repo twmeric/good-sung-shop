@@ -8,7 +8,7 @@ interface Campaign {
   id: number;
   scenarioKey: string;
   name: string;
-  defaultLang: string;
+  configJson?: string;
   isActive: number;
   createdAt: number;
   updatedAt: number;
@@ -17,7 +17,6 @@ interface Campaign {
 interface FormData {
   scenarioKey: string;
   name: string;
-  defaultLang: string;
 }
 
 interface NavigationTab {
@@ -39,8 +38,7 @@ const AdminCampaigns: React.FC = () => {
   const [success, setSuccess] = useState<string | null>(null);
   const [formData, setFormData] = useState<FormData>({
     scenarioKey: '',
-    name: '',
-    defaultLang: 'zh'
+    name: ''
   });
 
   const token = localStorage.getItem('admin_token');
@@ -75,13 +73,13 @@ const AdminCampaigns: React.FC = () => {
 
   const handleCreate = () => {
     setEditingId(null);
-    setFormData({ scenarioKey: '', name: '', defaultLang: 'zh' });
+    setFormData({ scenarioKey: '', name: '' });
     setShowForm(true);
   };
 
   const handleEdit = (campaign: Campaign) => {
     setEditingId(campaign.id);
-    setFormData({ scenarioKey: campaign.scenarioKey, name: campaign.name, defaultLang: campaign.defaultLang });
+    setFormData({ scenarioKey: campaign.scenarioKey, name: campaign.name });
     setShowForm(true);
   };
 
@@ -318,7 +316,9 @@ const AdminCampaigns: React.FC = () => {
                     <div className="mb-4">
                       <h3 className="text-lg font-bold text-gray-900">{campaign.name}</h3>
                       <p className="text-sm text-gray-600 font-mono">{campaign.scenarioKey}</p>
-                      <p className="text-xs text-gray-500 mt-2">語言：{campaign.defaultLang.toUpperCase()}</p>
+                      <p className="text-xs text-gray-500 mt-2">
+                        狀態：{campaign.isActive ? '啟用' : '停用'}
+                      </p>
                       <p className="text-xs text-gray-500 mt-1">
                         推廣連結：{' '}
                         <a
@@ -463,17 +463,7 @@ const AdminCampaigns: React.FC = () => {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">預設語言</label>
-                  <select
-                    value={formData.defaultLang}
-                    onChange={e => setFormData({ ...formData, defaultLang: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                  >
-                    <option value="zh">中文</option>
-                    <option value="en">英文</option>
-                  </select>
-                </div>
+
               </div>
               <div className="flex gap-2 mt-6">
                 <button

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Edit2, Save, X, ToggleLeft, ToggleRight, Trash2 } from 'lucide-react';
+import { Plus, Edit2, Save, X, ToggleLeft, ToggleRight, Trash2, KeyRound } from 'lucide-react';
 import AdminLayout from '../components/AdminLayout';
 
 const API_BASE = 'https://good-sung-shop.jimsbond007.workers.dev';
@@ -46,6 +46,8 @@ const AdminUsers: React.FC = () => {
   const [whatsappStatus, setWhatsappStatus] = useState<string>('');
 
   const [editData, setEditData] = useState<Partial<AdminUserItem>>({});
+  const [resetPasswordId, setResetPasswordId] = useState<number | null>(null);
+  const [newPassword, setNewPassword] = useState('');
 
   const token = localStorage.getItem('admin_token');
 
@@ -176,6 +178,34 @@ const AdminUsers: React.FC = () => {
     });
   };
 
+  const handleResetPassword = async () => {
+    if (!resetPasswordId || !newPassword) {
+      setError('請輸入新密碼');
+      return;
+    }
+    try {
+      const res = await fetch(`${API_BASE}/api/admin/users/${resetPasswordId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ password: newPassword }),
+      });
+      if (res.ok) {
+        setResetPasswordId(null);
+        setNewPassword('');
+        setSuccess('密碼重置成功');
+        setTimeout(() => setSuccess(null), 3000);
+      } else {
+        const data = await res.json();
+        setError(data.error || '重置失敗');
+      }
+    } catch (e) {
+      setError('重置失敗');
+    }
+  };
+
   return (
     <AdminLayout currentPage="users">
       <div>
@@ -183,6 +213,12 @@ const AdminUsers: React.FC = () => {
           <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 flex justify-between items-center">
             <span>{error}</span>
             <button onClick={() => setError('')} className="text-red-500 hover:text-red-700">✕</button>
+          </div>
+        )}
+        {success && (
+          <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg text-green-700 flex justify-between items-center">
+            <span>{success}</span>
+            <button onClick={() => setSuccess(null)} className="text-green-500 hover:text-green-700">✕</button>
           </div>
         )}
         {whatsappStatus && (
@@ -357,8 +393,9 @@ const AdminUsers: React.FC = () => {
                         </div>
                       ) : (
                         <div className="flex gap-2">
-                          <button onClick={() => startEdit(user)} className="text-blue-600 hover:text-blue-800"><Edit2 size={18} /></button>
-                          <button onClick={() => handleDelete(user.id)} className="text-red-600 hover:text-red-800"><Trash2 size={18} /></button>
+                          <button onClick={() => startEdit(user)} className="text-blue-600 hover:text-blue-800" title="編輯"><Edit2 size={18} /></button>
+                          <button onClick={() => { setResetPasswordId(user.id); setNewPassword(''); }} className="text-amber-600 hover:text-amber-800" title="重置密碼"><KeyRound size={18} /></button>
+                          <button onClick={() => handleDelete(user.id)} className="text-red-600 hover:text-red-800" title="刪除"><Trash2 size={18} /></button>
                         </div>
                       )}
                     </td>
@@ -369,6 +406,40 @@ const AdminUsers: React.FC = () => {
             {users.length === 0 && (
               <div className="p-8 text-center text-gray-500">沒有用戶</div>
             )}
+          </div>
+        )}
+
+        {/* Reset Password Modal */}
+        {resetPasswordId && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 max-w-sm w-full">
+              <h3 className="text-lg font-bold mb-4">重置密碼</h3>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">新密碼</label>
+                <input
+                  type="password"
+                  value={newPassword}
+                  onChange={e => setNewPassword(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  placeholder="輸入新密碼"
+                  autoFocus
+                />
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => { setResetPasswordId(null); setNewPassword(''); }}
+                  className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+                >
+                  取消
+                </button>
+                <button
+                  onClick={handleResetPassword}
+                  className="flex-1 px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700"
+                >
+                  確認重置
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>

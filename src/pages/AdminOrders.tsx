@@ -218,7 +218,7 @@ const AdminOrders: React.FC = () => {
     <AdminLayout currentPage="orders" onLogout={handleLogout}>
       {/* Filters */}
       <div className="mb-6 bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+        <div className="grid grid-cols-1 md:grid-cols-6 gap-4 items-end">
           <div className="md:col-span-1">
             <label className="block text-xs font-medium text-gray-500 mb-1">搜尋</label>
             <input
@@ -260,7 +260,7 @@ const AdminOrders: React.FC = () => {
               <option value="pending_proof">待審核</option>
             </select>
           </div>
-          <div className="md:col-span-1 flex items-center justify-end gap-3">
+          <div className="md:col-span-2 flex items-center justify-end gap-3">
             <div className="text-sm text-gray-500">
               共 <span className="font-bold text-gray-800">{filteredOrders.length}</span> 筆
               {hasActiveFilters && <span className="text-purple-600 text-xs ml-1">（已篩選）</span>}
