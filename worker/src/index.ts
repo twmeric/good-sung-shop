@@ -274,6 +274,13 @@ async function initDB(db: D1Database, env: Env) {
       updated_by INTEGER,
       updated_at INTEGER DEFAULT (unixepoch())
     )`,
+    `CREATE TABLE IF NOT EXISTS whatsapp_messages (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      phone TEXT NOT NULL,
+      message TEXT NOT NULL,
+      sender TEXT NOT NULL,
+      created_at INTEGER DEFAULT (unixepoch())
+    )`,
   ];
 
   for (const sql of tables) {
@@ -1502,10 +1509,80 @@ app.post("/api/webhooks/whatsapp", async (c) => {
       return jsonResponse({ status: "success", message: "verified", code });
     }
 
+    // Store non-verification messages in DB for conversation history
+    try {
+      await c.env.DB.prepare(
+        `INSERT INTO whatsapp_messages (phone, message, sender, created_at) VALUES (?, ?, ?, ?)`
+      ).bind(phone, message, 'user', Math.floor(Date.now() / 1000)).run();
+    } catch (dbErr) {
+      console.error("[WEBHOOK] Failed to store message:", dbErr);
+    }
+
     return jsonResponse({ status: "success", message: "received", phone });
   } catch (e) {
     console.error("[WEBHOOK] Internal error:", e);
     return jsonResponse({ error: "Internal error", detail: String(e) }, 500);
+  }
+});
+
+// --------------------------------------------------
+// Admin: WhatsApp Conversations
+// --------------------------------------------------
+app.get("/api/public/admin/whatsapp/conversations", authMiddleware(), async (c) => {
+  try {
+    const { results } = await c.env.DB.prepare(
+      `SELECT phone, MAX(created_at) as last_message_at, COUNT(*) as message_count
+       FROM whatsapp_messages
+       GROUP BY phone
+       ORDER BY last_message_at DESC`
+    ).all();
+    return jsonResponse({ conversations: (results || []).map(snakeToCamel) });
+  } catch (e) {
+    return jsonResponse({ error: "Failed to fetch conversations" }, 500);
+  }
+});
+
+app.get("/api/public/admin/whatsapp/conversations/:phone", authMiddleware(), async (c) => {
+  try {
+    const phone = c.req.param("phone");
+    const { results } = await c.env.DB.prepare(
+      `SELECT * FROM whatsapp_messages WHERE phone = ? ORDER BY created_at DESC LIMIT 100`
+    ).bind(phone).all();
+    return jsonResponse({
+      phone,
+      messages: (results || []).map(snakeToCamel),
+    });
+  } catch (e) {
+    return jsonResponse({ error: "Failed to fetch conversation" }, 500);
+  }
+});
+
+app.post("/api/public/admin/whatsapp/send", authMiddleware(), async (c) => {
+  try {
+    const body = await c.req.json();
+    const { phone, message } = body;
+    if (!phone || !message) {
+      return jsonResponse({ error: "Phone and message are required" }, 400);
+    }
+
+    const result = await sendWhatsAppMessage(c.env, phone, message);
+    if (!result.success) {
+      return jsonResponse({ error: result.error }, 500);
+    }
+
+    // Store sent message in DB
+    await c.env.DB.prepare(
+      `INSERT INTO whatsapp_messages (phone, message, sender, created_at) VALUES (?, ?, ?, ?)`
+    ).bind(phone, message, 'bot', Math.floor(Date.now() / 1000)).run();
+
+    const user = c.get("adminUser") as AdminUser;
+    c.executionCtx?.waitUntil(
+      logAudit(c.env.DB, user, "SEND_WHATSAPP", "message", phone, { message })
+    );
+
+    return jsonResponse({ success: true });
+  } catch (e) {
+    return jsonResponse({ error: "Failed to send message" }, 500);
   }
 });
 
