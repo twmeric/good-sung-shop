@@ -4,8 +4,9 @@ import OrderConfirmation from './pages/OrderConfirmation';
 import PaymentProofUpload from './pages/PaymentProofUpload';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
+import AdminOrders from './pages/AdminOrders';
 import AdminOrderDetail from './pages/AdminOrderDetail';
-import AdminConversations from './pages/AdminConversations';
+
 import AdminCampaigns from './pages/AdminCampaigns';
 import AdminCampaignSettings from './pages/AdminCampaignSettings';
 import AdminProducts from './pages/AdminProducts';
@@ -52,7 +53,7 @@ function App() {
         } />
         <Route path="/admin/orders" element={
           <AdminRoute allowedRoles={['super_admin', 'admin']}>
-            <AdminDashboard />
+            <AdminOrders />
           </AdminRoute>
         } />
         <Route path="/admin/orders/:id" element={
@@ -90,11 +91,7 @@ function App() {
             <AdminAuditLogs />
           </AdminRoute>
         } />
-        <Route path="/admin/conversations" element={
-          <AdminRoute allowedRoles={['super_admin']}>
-            <AdminConversations />
-          </AdminRoute>
-        } />
+
       </Routes>
     </Router>
   );
