@@ -13,6 +13,7 @@ interface Product {
   price: number | null;
   original_price: number | null;
   is_active: number;
+  stock_quantity: number;
   sort_order: number;
   image_url: string | null;
   max_select: number;
@@ -43,6 +44,7 @@ const AdminProducts: React.FC = () => {
     description: '',
     price: null,
     is_active: 1,
+    stock_quantity: 50,
     sort_order: 0,
   });
 
@@ -133,7 +135,7 @@ const AdminProducts: React.FC = () => {
       });
       if (res.ok) {
         setShowAddForm(false);
-        setNewProduct({ category: 'dish', name: '', description: '', price: null, is_active: 1, sort_order: 0 });
+        setNewProduct({ category: 'dish', name: '', description: '', price: null, is_active: 1, stock_quantity: 50, sort_order: 0 });
         fetchProducts();
       }
     } catch (e) {
@@ -248,6 +250,16 @@ const AdminProducts: React.FC = () => {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                 />
               </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">庫存</label>
+                <input
+                  type="number"
+                  value={newProduct.stock_quantity ?? ''}
+                  onChange={e => setNewProduct({ ...newProduct, stock_quantity: e.target.value ? parseInt(e.target.value) : 0 })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  placeholder="數量"
+                />
+              </div>
             </div>
             <div className="mt-4 flex gap-2">
               <button onClick={handleAdd} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">創建</button>
@@ -268,6 +280,7 @@ const AdminProducts: React.FC = () => {
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">名稱</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">描述</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">價格</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">庫存</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">狀態</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">操作</th>
                 </tr>
@@ -318,6 +331,25 @@ const AdminProducts: React.FC = () => {
                           />
                         ) : (
                           product.price ? `HK$${product.price}` : '-'
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-sm">
+                        {isEditing ? (
+                          <input
+                            type="number"
+                            value={editForm.stock_quantity ?? 0}
+                            onChange={e => setEditForm({ ...editForm, stock_quantity: parseInt(e.target.value) || 0 })}
+                            className="w-20 px-2 py-1 border border-gray-300 rounded text-sm"
+                          />
+                        ) : (
+                          <span className={`font-medium ${
+                            product.stock_quantity === 0 ? 'text-red-600' :
+                            product.stock_quantity < 15 ? 'text-orange-500' : 'text-green-600'
+                          }`}>
+                            {product.stock_quantity}
+                            {product.stock_quantity === 0 && <span className="ml-1 text-xs">(缺貨)</span>}
+                            {product.stock_quantity > 0 && product.stock_quantity < 15 && <span className="ml-1 text-xs">(即將售罄)</span>}
+                          </span>
                         )}
                       </td>
                       <td className="px-4 py-3">

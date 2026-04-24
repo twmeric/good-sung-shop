@@ -77,8 +77,20 @@ interface ApiProduct {
   description: string | null;
   price: number | null;
   is_active: number;
+  stock_quantity: number;
   sort_order: number;
   max_select: number | null;
+}
+
+interface PackageConfig {
+  id: number;
+  typeKey: string;
+  name: string;
+  price: number;
+  dishCount: number;
+  soupCount: number;
+  isActive: number;
+  sortOrder: number;
 }
 
 const BUSINESS_PHONE = '85262322466';
@@ -127,6 +139,7 @@ const OrderLanding: React.FC = () => {
   const [soups, setSoups] = useState<SoupItem[]>(DEFAULT_SOUPS);
   const [packages, setPackages] = useState(DEFAULT_PACKAGES);
   const [productsLoaded, setProductsLoaded] = useState(false);
+  const [lowStockItems, setLowStockItems] = useState<Set<string>>(new Set());
 
   // ── Verification ──
   const [verifyCode, setVerifyCode] = useState('');
@@ -170,41 +183,60 @@ const OrderLanding: React.FC = () => {
 
   // Fetch products from API
   useEffect(() => {
-    fetch(`${API_BASE}/api/public/products`)
-      .then(res => res.ok ? res.json() : null)
-      .then((data: ApiProduct[] | null) => {
-        if (!data || !Array.isArray(data)) return;
-        const fetchedDishes: DishItem[] = data
-          .filter(p => p.category === 'dish')
-          .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
-          .map((p, idx) => ({
-            id: `d${p.id}`,
-            name: p.name,
-            description: p.description || '',
-            enabled: p.is_active === 1,
-          }));
-        const fetchedSoups: SoupItem[] = data
-          .filter(p => p.category === 'soup')
-          .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
-          .map((p, idx) => ({
-            id: `s${p.id}`,
-            name: p.name,
-            enabled: p.is_active === 1,
-          }));
-        const fetchedPackages = data
-          .filter(p => p.category === 'package')
-          .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
-          .map(p => ({
-            type: p.id === 16 ? '2-dish-1-soup' as const : '3-dish-1-soup' as const,
-            name: p.name,
-            price: p.price || 99,
-            dishCount: p.max_select || 2,
-            soupCount: 1,
-          }));
+    Promise.all([
+      fetch(`${API_BASE}/api/public/products`).then(r => r.ok ? r.json() : null),
+      fetch(`${API_BASE}/api/public/package-configs`).then(r => r.ok ? r.json() : null),
+    ])
+      .then(([data, pkgData]: [ApiProduct[] | null, PackageConfig[] | null]) => {
+        if (data && Array.isArray(data)) {
+          const lowStock = new Set<string>();
+          const fetchedDishes: DishItem[] = data
+            .filter(p => p.category === 'dish' && p.stock_quantity > 0)
+            .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
+            .map((p) => {
+              if (p.stock_quantity > 0 && p.stock_quantity < 15) {
+                lowStock.add(`d${p.id}`);
+              }
+              return {
+                id: `d${p.id}`,
+                name: p.name,
+                description: p.description || '',
+                enabled: p.is_active === 1,
+              };
+            });
+          const fetchedSoups: SoupItem[] = data
+            .filter(p => p.category === 'soup' && p.stock_quantity > 0)
+            .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
+            .map((p) => {
+              if (p.stock_quantity > 0 && p.stock_quantity < 15) {
+                lowStock.add(`s${p.id}`);
+              }
+              return {
+                id: `s${p.id}`,
+                name: p.name,
+                enabled: p.is_active === 1,
+              };
+            });
 
-        if (fetchedDishes.length > 0) setDishes(fetchedDishes);
-        if (fetchedSoups.length > 0) setSoups(fetchedSoups);
-        if (fetchedPackages.length > 0) setPackages(fetchedPackages);
+          if (fetchedDishes.length > 0) setDishes(fetchedDishes);
+          if (fetchedSoups.length > 0) setSoups(fetchedSoups);
+          setLowStockItems(lowStock);
+        }
+
+        if (pkgData && Array.isArray(pkgData) && pkgData.length > 0) {
+          const fetchedPackages = pkgData
+            .filter(p => p.isActive === 1)
+            .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0))
+            .map(p => ({
+              type: p.typeKey as '2-dish-1-soup' | '3-dish-1-soup',
+              name: p.name,
+              price: p.price,
+              dishCount: p.dishCount,
+              soupCount: p.soupCount,
+            }));
+          if (fetchedPackages.length > 0) setPackages(fetchedPackages);
+        }
+
         setProductsLoaded(true);
       })
       .catch(() => { /* fallback to defaults */ });
@@ -608,12 +640,13 @@ const OrderLanding: React.FC = () => {
               {dishes.filter(d => d.enabled).map(dish => {
                 const isSelected = selectedDishes.includes(dish.id);
                 const isDisabled = !isSelected && selectedDishes.length >= selectedPackage.dishCount;
+                const isLowStock = lowStockItems.has(dish.id);
                 return (
                   <button
                     key={dish.id}
                     onClick={() => !isDisabled && toggleDish(dish.id)}
                     disabled={isDisabled}
-                    className={`rounded-xl p-4 text-center transition-all border-2 ${
+                    className={`rounded-xl p-4 text-center transition-all border-2 relative ${
                       isSelected
                         ? 'bg-brand-100 border-brand-500 shadow-md'
                         : isDisabled
@@ -621,6 +654,11 @@ const OrderLanding: React.FC = () => {
                           : 'bg-white border-gray-200 hover:border-brand-300 hover:shadow'
                     }`}
                   >
+                    {isLowStock && (
+                      <span className="absolute -top-2 -right-2 bg-orange-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow">
+                        即將售罄
+                      </span>
+                    )}
                     <div className={`w-8 h-8 mx-auto mb-2 rounded-full flex items-center justify-center ${isSelected ? 'bg-brand-500 text-white' : 'bg-gray-200'}`}>
                       {isSelected ? <CheckCircle size={20} /> : <span className="text-sm">{dishes.indexOf(dish) + 1}</span>}
                     </div>
@@ -636,16 +674,22 @@ const OrderLanding: React.FC = () => {
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
               {soups.filter(s => s.enabled).map(soup => {
                 const isSelected = selectedSoup === soup.id;
+                const isLowStock = lowStockItems.has(soup.id);
                 return (
                   <button
                     key={soup.id}
                     onClick={() => setSelectedSoup(soup.id)}
-                    className={`rounded-xl p-4 text-center transition-all border-2 ${
+                    className={`rounded-xl p-4 text-center transition-all border-2 relative ${
                       isSelected
                         ? 'bg-brand-100 border-brand-500 shadow-md'
                         : 'bg-white border-gray-200 hover:border-brand-300 hover:shadow'
                     }`}
                   >
+                    {isLowStock && (
+                      <span className="absolute -top-2 -right-2 bg-orange-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow">
+                        即將售罄
+                      </span>
+                    )}
                     <div className={`w-8 h-8 mx-auto mb-2 rounded-full flex items-center justify-center ${isSelected ? 'bg-brand-500 text-white' : 'bg-gray-200'}`}>
                       {isSelected ? <CheckCircle size={20} /> : <span className="text-sm">{soups.indexOf(soup) + 1}</span>}
                     </div>

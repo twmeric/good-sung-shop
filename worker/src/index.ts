@@ -249,10 +249,23 @@ async function initDB(db: D1Database, env: Env) {
       price INTEGER,
       original_price INTEGER,
       is_active INTEGER DEFAULT 1,
+      stock_quantity INTEGER DEFAULT 0,
       sort_order INTEGER DEFAULT 0,
       image_url TEXT,
       max_select INTEGER DEFAULT 1,
       updated_by INTEGER,
+      updated_at INTEGER DEFAULT (unixepoch())
+    )`,
+    `CREATE TABLE IF NOT EXISTS package_configs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      config_key TEXT NOT NULL UNIQUE,
+      name TEXT NOT NULL,
+      dish_count INTEGER NOT NULL DEFAULT 2,
+      soup_count INTEGER NOT NULL DEFAULT 1,
+      price INTEGER NOT NULL,
+      is_active INTEGER DEFAULT 1,
+      sort_order INTEGER DEFAULT 0,
+      created_at INTEGER DEFAULT (unixepoch()),
       updated_at INTEGER DEFAULT (unixepoch())
     )`,
     `CREATE TABLE IF NOT EXISTS admin_audit_logs (
@@ -293,7 +306,7 @@ async function initDB(db: D1Database, env: Env) {
     }
   }
 
-  // Migrate: add columns to existing admin_users table
+  // Migrate: add columns to existing tables
   const migrations = [
     `ALTER TABLE admin_users ADD COLUMN role TEXT NOT NULL DEFAULT 'admin'`,
     `ALTER TABLE admin_users ADD COLUMN display_name TEXT`,
@@ -302,6 +315,7 @@ async function initDB(db: D1Database, env: Env) {
     `ALTER TABLE admin_users ADD COLUMN token TEXT`,
     `ALTER TABLE admin_users ADD COLUMN created_at INTEGER DEFAULT (unixepoch())`,
     `ALTER TABLE admin_users ADD COLUMN updated_at INTEGER DEFAULT (unixepoch())`,
+    `ALTER TABLE cms_products ADD COLUMN stock_quantity INTEGER DEFAULT 0`,
   ];
   for (const sql of migrations) {
     try {
@@ -397,6 +411,26 @@ async function initDB(db: D1Database, env: Env) {
     }
   } catch (e: any) {
     console.error("[DB INIT] Product seed error:", e.message);
+  }
+
+  // Seed default package configs if table is empty
+  try {
+    const { results } = await db.prepare(`SELECT COUNT(*) as count FROM package_configs`).all();
+    const count = (results?.[0] as any)?.count || 0;
+    if (count === 0) {
+      const now = Math.floor(Date.now() / 1000);
+      await db.prepare(
+        `INSERT INTO package_configs (config_key, name, dish_count, soup_count, price, is_active, sort_order, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      ).bind("2-dish-1-soup", "2餸1湯", 2, 1, 99, 1, 0, now, now).run();
+      await db.prepare(
+        `INSERT INTO package_configs (config_key, name, dish_count, soup_count, price, is_active, sort_order, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      ).bind("3-dish-1-soup", "3餸1湯", 3, 1, 129, 1, 1, now, now).run();
+      console.log("[DB INIT] Default package configs seeded");
+    }
+  } catch (e: any) {
+    console.error("[DB INIT] Package config seed error:", e.message);
   }
 }
 
@@ -940,6 +974,28 @@ app.put("/api/public/admin/orders/:id", authMiddleware(), async (c) => {
       c.executionCtx.waitUntil(
         sendWhatsAppMessage(c.env, existing.phone, msg)
       );
+
+      // Deduct stock when payment is confirmed
+      try {
+        const items = JSON.parse(existing.items || '[]');
+        const productCounts: Record<string, number> = {};
+        for (const item of items) {
+          const qty = item.quantity || 1;
+          for (const dishName of (item.selectedDishes || [])) {
+            productCounts[dishName] = (productCounts[dishName] || 0) + qty;
+          }
+          if (item.selectedSoup) {
+            productCounts[item.selectedSoup] = (productCounts[item.selectedSoup] || 0) + qty;
+          }
+        }
+        for (const [productName, count] of Object.entries(productCounts)) {
+          await c.env.DB.prepare(
+            `UPDATE cms_products SET stock_quantity = MAX(0, stock_quantity - ?), is_active = CASE WHEN stock_quantity - ? <= 0 THEN 0 ELSE is_active END WHERE name = ?`
+          ).bind(count, count, productName).run();
+        }
+      } catch (stockErr) {
+        console.error("[STOCK] Failed to deduct stock:", stockErr);
+      }
     }
 
     return jsonResponse({ success: true });
@@ -948,7 +1004,7 @@ app.put("/api/public/admin/orders/:id", authMiddleware(), async (c) => {
   }
 });
 
-app.delete("/api/public/admin/orders/:id", authMiddleware(["super_admin"]), async (c) => {
+app.delete("/api/public/admin/orders/:id", authMiddleware(["super_admin", "admin"]), async (c) => {
   try {
     const id = Number(c.req.param("id"));
     const user = c.get("adminUser") as AdminUser;
@@ -1058,8 +1114,8 @@ app.post("/api/public/admin/products", authMiddleware(), async (c) => {
     const now = Math.floor(Date.now() / 1000);
 
     const result = await c.env.DB.prepare(
-      `INSERT INTO cms_products (category, name, description, price, original_price, is_active, sort_order, image_url, max_select, updated_by, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      `INSERT INTO cms_products (category, name, description, price, original_price, is_active, stock_quantity, sort_order, image_url, max_select, updated_by, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     ).bind(
       body.category,
       body.name,
@@ -1067,6 +1123,7 @@ app.post("/api/public/admin/products", authMiddleware(), async (c) => {
       body.price || null,
       body.original_price || null,
       body.is_active !== undefined ? (body.is_active ? 1 : 0) : 1,
+      body.stock_quantity !== undefined ? body.stock_quantity : 0,
       body.sort_order || 0,
       body.image_url || null,
       body.max_select || 1,
@@ -1100,6 +1157,7 @@ app.put("/api/public/admin/products/:id", authMiddleware(), async (c) => {
     if (body.price !== undefined) { setClause.push("price = ?"); values.push(body.price); }
     if (body.original_price !== undefined) { setClause.push("original_price = ?"); values.push(body.original_price); }
     if (body.is_active !== undefined) { setClause.push("is_active = ?"); values.push(body.is_active ? 1 : 0); }
+    if (body.stock_quantity !== undefined) { setClause.push("stock_quantity = ?"); values.push(body.stock_quantity); }
     if (body.sort_order !== undefined) { setClause.push("sort_order = ?"); values.push(body.sort_order); }
     if (body.image_url !== undefined) { setClause.push("image_url = ?"); values.push(body.image_url); }
     if (body.max_select !== undefined) { setClause.push("max_select = ?"); values.push(body.max_select); }
@@ -1165,7 +1223,7 @@ app.delete("/api/public/admin/products/:id", authMiddleware(["super_admin", "adm
 app.get("/api/public/products", async (c) => {
   try {
     const category = c.req.query("category");
-    let sql = `SELECT id, category, name, description, price, original_price, is_active, sort_order, image_url, max_select FROM cms_products`;
+    let sql = `SELECT id, category, name, description, price, original_price, is_active, stock_quantity, sort_order, image_url, max_select FROM cms_products`;
     const params: any[] = [];
     if (category) {
       sql += ` WHERE category = ?`;
@@ -1173,9 +1231,140 @@ app.get("/api/public/products", async (c) => {
     }
     sql += ` ORDER BY category, sort_order, id`;
     const { results } = await c.env.DB.prepare(sql).bind(...params).all();
-    return jsonResponse(results || []);
+    // Add stock status for frontend
+    const products = (results || []).map((p: any) => ({
+      ...p,
+      stockStatus: (p.stock_quantity || 0) <= 0 ? 'out_of_stock' : (p.stock_quantity < 15 ? 'low_stock' : 'in_stock'),
+      lowStockWarning: (p.stock_quantity || 0) > 0 && (p.stock_quantity || 0) < 15,
+    }));
+    return jsonResponse(products);
   } catch (e) {
     return jsonResponse({ error: "Failed to fetch products" }, 500);
+  }
+});
+
+// --------------------------------------------------
+// Admin: Package Configs
+// --------------------------------------------------
+app.get("/api/public/admin/package-configs", authMiddleware(), async (c) => {
+  try {
+    const { results } = await c.env.DB.prepare(
+      `SELECT * FROM package_configs ORDER BY sort_order, id`
+    ).all();
+    const configs = (results || []).map((r: any) => ({
+      id: r.id,
+      typeKey: r.config_key,
+      name: r.name,
+      price: r.price,
+      dishCount: r.dish_count,
+      soupCount: r.soup_count,
+      isActive: r.is_active,
+      sortOrder: r.sort_order,
+      createdAt: r.created_at,
+      updatedAt: r.updated_at,
+    }));
+    return jsonResponse(configs);
+  } catch (e) {
+    return jsonResponse({ error: "Failed to fetch package configs" }, 500);
+  }
+});
+
+app.post("/api/public/admin/package-configs", authMiddleware(), async (c) => {
+  try {
+    const body = await c.req.json();
+    const now = Math.floor(Date.now() / 1000);
+    // Support both camelCase (frontend) and snake_case field names
+    const configKey = body.typeKey || body.config_key;
+    const dishCount = body.dishCount !== undefined ? body.dishCount : (body.dish_count || 2);
+    const soupCount = body.soupCount !== undefined ? body.soupCount : (body.soup_count || 1);
+    const sortOrder = body.sortOrder !== undefined ? body.sortOrder : (body.sort_order || 0);
+    const isActive = body.isActive !== undefined ? body.isActive : (body.is_active !== undefined ? body.is_active : 1);
+    const result = await c.env.DB.prepare(
+      `INSERT INTO package_configs (config_key, name, dish_count, soup_count, price, is_active, sort_order, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    ).bind(
+      configKey,
+      body.name,
+      dishCount,
+      soupCount,
+      body.price || 0,
+      isActive ? 1 : 0,
+      sortOrder,
+      now, now
+    ).run();
+    return jsonResponse({ success: true, id: result.meta?.last_row_id }, 201);
+  } catch (e) {
+    return jsonResponse({ error: "Failed to create package config" }, 500);
+  }
+});
+
+app.put("/api/public/admin/package-configs/:id", authMiddleware(), async (c) => {
+  try {
+    const id = Number(c.req.param("id"));
+    const body = await c.req.json();
+    const setClause: string[] = [];
+    const values: any[] = [];
+    if (body.typeKey !== undefined || body.config_key !== undefined) { setClause.push("config_key = ?"); values.push(body.typeKey !== undefined ? body.typeKey : body.config_key); }
+    if (body.name !== undefined) { setClause.push("name = ?"); values.push(body.name); }
+    if (body.dishCount !== undefined || body.dish_count !== undefined) { setClause.push("dish_count = ?"); values.push(body.dishCount !== undefined ? body.dishCount : body.dish_count); }
+    if (body.soupCount !== undefined || body.soup_count !== undefined) { setClause.push("soup_count = ?"); values.push(body.soupCount !== undefined ? body.soupCount : body.soup_count); }
+    if (body.price !== undefined) { setClause.push("price = ?"); values.push(body.price); }
+    if (body.isActive !== undefined || body.is_active !== undefined) { setClause.push("is_active = ?"); values.push((body.isActive !== undefined ? body.isActive : body.is_active) ? 1 : 0); }
+    if (body.sortOrder !== undefined || body.sort_order !== undefined) { setClause.push("sort_order = ?"); values.push(body.sortOrder !== undefined ? body.sortOrder : body.sort_order); }
+    setClause.push("updated_at = ?"); values.push(Math.floor(Date.now() / 1000));
+    values.push(id);
+    await c.env.DB.prepare(
+      `UPDATE package_configs SET ${setClause.join(", ")} WHERE id = ?`
+    ).bind(...values).run();
+    return jsonResponse({ success: true });
+  } catch (e) {
+    return jsonResponse({ error: "Failed to update package config" }, 500);
+  }
+});
+
+app.post("/api/public/admin/package-configs/:id/toggle", authMiddleware(), async (c) => {
+  try {
+    const id = Number(c.req.param("id"));
+    const body = await c.req.json();
+    const isActive = body.isActive !== undefined ? (body.isActive ? 1 : 0) : 1;
+    await c.env.DB.prepare(
+      `UPDATE package_configs SET is_active = ?, updated_at = ? WHERE id = ?`
+    ).bind(isActive, Math.floor(Date.now() / 1000), id).run();
+    return jsonResponse({ success: true });
+  } catch (e) {
+    return jsonResponse({ error: "Failed to toggle package config" }, 500);
+  }
+});
+
+app.delete("/api/public/admin/package-configs/:id", authMiddleware(["super_admin", "admin"]), async (c) => {
+  try {
+    const id = Number(c.req.param("id"));
+    await c.env.DB.prepare(`DELETE FROM package_configs WHERE id = ?`).bind(id).run();
+    return jsonResponse({ success: true });
+  } catch (e) {
+    return jsonResponse({ error: "Failed to delete package config" }, 500);
+  }
+});
+
+// Public: Package Configs (for frontend)
+app.get("/api/public/package-configs", async (c) => {
+  try {
+    const { results } = await c.env.DB.prepare(
+      `SELECT id, config_key, name, dish_count, soup_count, price, is_active, sort_order FROM package_configs WHERE is_active = 1 ORDER BY sort_order, id`
+    ).all();
+    const configs = (results || []).map((r: any) => ({
+      id: r.id,
+      typeKey: r.config_key,
+      name: r.name,
+      price: r.price,
+      dishCount: r.dish_count,
+      soupCount: r.soup_count,
+      isActive: r.is_active,
+      sortOrder: r.sort_order,
+    }));
+    return jsonResponse(configs);
+  } catch (e) {
+    return jsonResponse({ error: "Failed to fetch package configs" }, 500);
   }
 });
 

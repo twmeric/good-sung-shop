@@ -20,6 +20,7 @@ const ALL_MENU_ITEMS = [
   { id: 'dashboard', label: '儀表板', icon: LayoutDashboard, roles: ['super_admin', 'admin'], path: '/admin/dashboard' },
   { id: 'orders', label: '訂單管理', icon: ShoppingCart, roles: ['super_admin', 'admin'], path: '/admin/orders' },
   { id: 'products', label: '產品管理', icon: ChefHat, roles: ['super_admin', 'admin', 'supplier'], path: '/admin/products' },
+  { id: 'package-configs', label: '套餐配置', icon: Briefcase, roles: ['super_admin', 'admin'], path: '/admin/package-configs' },
   { id: 'campaigns', label: '行銷活動', icon: Briefcase, roles: ['super_admin'], path: '/admin/campaigns' },
   { id: 'users', label: '用戶管理', icon: Users, roles: ['super_admin'], path: '/admin/users' },
   { id: 'audit-logs', label: '操作日誌', icon: ClipboardList, roles: ['super_admin'], path: '/admin/audit-logs' },

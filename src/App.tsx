@@ -10,6 +10,7 @@ import AdminOrderDetail from './pages/AdminOrderDetail';
 import AdminCampaigns from './pages/AdminCampaigns';
 import AdminCampaignSettings from './pages/AdminCampaignSettings';
 import AdminProducts from './pages/AdminProducts';
+import AdminPackageConfigs from './pages/AdminPackageConfigs';
 import AdminUsers from './pages/AdminUsers';
 import AdminSettings from './pages/AdminSettings';
 import AdminAuditLogs from './pages/AdminAuditLogs';
@@ -64,6 +65,11 @@ function App() {
         <Route path="/admin/products" element={
           <AdminRoute allowedRoles={['super_admin', 'admin', 'supplier']}>
             <AdminProducts />
+          </AdminRoute>
+        } />
+        <Route path="/admin/package-configs" element={
+          <AdminRoute allowedRoles={['super_admin', 'admin']}>
+            <AdminPackageConfigs />
           </AdminRoute>
         } />
         <Route path="/admin/campaigns" element={
