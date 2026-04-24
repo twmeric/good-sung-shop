@@ -241,6 +241,42 @@ async function initDB(db: D1Database, env: Env) {
       is_active INTEGER DEFAULT 1,
       created_at INTEGER DEFAULT (unixepoch())
     )`,
+    `CREATE TABLE IF NOT EXISTS broadcast_campaigns (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      message_content TEXT NOT NULL,
+      created_by INTEGER,
+      created_at INTEGER DEFAULT (unixepoch()),
+      updated_at INTEGER DEFAULT (unixepoch())
+    )`,
+    `CREATE TABLE IF NOT EXISTS broadcast_batches (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      campaign_id INTEGER NOT NULL,
+      name TEXT NOT NULL,
+      target_count INTEGER DEFAULT 0,
+      sent_count INTEGER DEFAULT 0,
+      failed_count INTEGER DEFAULT 0,
+      status TEXT DEFAULT 'pending',
+      rate_min_seconds INTEGER DEFAULT 25,
+      rate_max_seconds INTEGER DEFAULT 120,
+      wave_size INTEGER DEFAULT 50,
+      wave_interval_seconds INTEGER DEFAULT 300,
+      created_by INTEGER,
+      created_at INTEGER DEFAULT (unixepoch()),
+      updated_at INTEGER DEFAULT (unixepoch())
+    )`,
+    `CREATE TABLE IF NOT EXISTS broadcast_logs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      batch_id INTEGER NOT NULL,
+      campaign_id INTEGER NOT NULL,
+      customer_phone TEXT NOT NULL,
+      customer_name TEXT,
+      message_content TEXT NOT NULL,
+      status TEXT DEFAULT 'pending',
+      error_message TEXT,
+      sent_at INTEGER,
+      created_at INTEGER DEFAULT (unixepoch())
+    )`,
     `CREATE TABLE IF NOT EXISTS referral_records (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       referrer_phone TEXT NOT NULL,
@@ -1504,61 +1540,8 @@ app.get("/media/:name", async (c) => {
 });
 
 // --------------------------------------------------
-// Admin: Campaigns
-// --------------------------------------------------
-app.get("/api/public/admin/scenarios", authMiddleware(["super_admin"]), async (c) => {
-  try {
-    const { results } = await c.env.DB.prepare(
-      `SELECT * FROM campaigns ORDER BY created_at DESC`
-    ).all();
-    return jsonResponse((results || []).map(snakeToCamel));
-  } catch (e) {
-    return jsonResponse({ error: "Failed" }, 500);
-  }
-});
-
-app.post("/api/public/admin/scenarios", authMiddleware(["super_admin"]), async (c) => {
-  try {
-    const { scenarioKey, name, config } = await c.req.json();
-    if (!scenarioKey || !name) {
-      return jsonResponse({ error: "Missing fields" }, 400);
-    }
-
-    await c.env.DB.prepare(
-      `INSERT INTO campaigns (scenario_key, name, config_json) VALUES (?, ?, ?)`
-    )
-      .bind(scenarioKey, name, JSON.stringify(config || {}))
-      .run();
-
-    return jsonResponse({ success: true }, 201);
-  } catch (e) {
-    return jsonResponse({ error: "Failed" }, 500);
-  }
-});
-
-app.get("/api/public/admin/scenarios/:key", authMiddleware(["super_admin"]), async (c) => {
-  try {
-    const key = c.req.param("key");
-    const row = await c.env.DB.prepare(
-      `SELECT * FROM campaigns WHERE scenario_key = ?`
-    )
-      .bind(key)
-      .first();
-    if (!row) return jsonResponse({ error: "Not found" }, 404);
-    // Parse config_json for frontend
-    const result = snakeToCamel(row);
-    try {
-      result.config = JSON.parse(row.config_json || '{}');
-    } catch {
-      result.config = {};
-    }
-    return jsonResponse(result);
-  } catch (e) {
-    return jsonResponse({ error: "Failed" }, 500);
-  }
-});
-
 // Public: Campaign config (for landing page)
+// --------------------------------------------------
 app.get("/api/public/campaigns/:key", async (c) => {
   try {
     const key = c.req.param("key");
@@ -1579,37 +1562,262 @@ app.get("/api/public/campaigns/:key", async (c) => {
   }
 });
 
-app.put("/api/public/admin/scenarios/:key", authMiddleware(["super_admin"]), async (c) => {
+// --------------------------------------------------
+// Admin: Broadcast System
+// --------------------------------------------------
+app.get("/api/public/admin/customers", authMiddleware(["super_admin"]), async (c) => {
   try {
-    const key = c.req.param("key");
-    const { name, config, isActive } = await c.req.json();
+    const paymentStatus = c.req.query("paymentStatus") || "all";
+    const estate = c.req.query("estate") || "all";
+    const daysSinceLastOrder = c.req.query("daysSinceLastOrder") || "all";
+
+    let sql = `SELECT name, phone, COALESCE(estate, '') as estate, MAX(created_at) as last_order_at, COUNT(*) as total_orders, SUM(total_price) as total_spent FROM order_records WHERE 1=1`;
+    const params: any[] = [];
+
+    if (paymentStatus === "paid") {
+      sql += ` AND payment_confirmed = 1`;
+    }
+    if (estate !== "all") {
+      sql += ` AND estate = ?`;
+      params.push(estate);
+    }
+    if (daysSinceLastOrder !== "all") {
+      const days = Number(daysSinceLastOrder);
+      if (!isNaN(days)) {
+        const cutoff = Math.floor(Date.now() / 1000) - days * 86400;
+        sql += ` AND created_at >= ?`;
+        params.push(cutoff);
+      }
+    }
+
+    sql += ` GROUP BY phone ORDER BY last_order_at DESC`;
+
+    const { results } = await c.env.DB.prepare(sql).bind(...params).all();
+    return jsonResponse((results || []).map(snakeToCamel));
+  } catch (e) {
+    return jsonResponse({ error: "Failed to fetch customers" }, 500);
+  }
+});
+
+app.get("/api/public/admin/broadcast-campaigns", authMiddleware(["super_admin"]), async (c) => {
+  try {
+    const { results } = await c.env.DB.prepare(
+      `SELECT * FROM broadcast_campaigns ORDER BY created_at DESC`
+    ).all();
+    return jsonResponse((results || []).map(snakeToCamel));
+  } catch (e) {
+    return jsonResponse({ error: "Failed to fetch broadcast campaigns" }, 500);
+  }
+});
+
+app.post("/api/public/admin/broadcast-campaigns", authMiddleware(["super_admin"]), async (c) => {
+  try {
+    const body = await c.req.json();
+    const { name, messageContent } = body;
+    if (!name || !messageContent) {
+      return jsonResponse({ error: "Missing fields" }, 400);
+    }
+    const user = c.get("adminUser") as AdminUser;
+    const now = Math.floor(Date.now() / 1000);
+    const result = await c.env.DB.prepare(
+      `INSERT INTO broadcast_campaigns (name, message_content, created_by, created_at, updated_at) VALUES (?, ?, ?, ?, ?)`
+    ).bind(name, messageContent, user.id, now, now).run();
+
+    const newId = result.meta?.last_row_id;
+    c.executionCtx?.waitUntil(
+      logAudit(c.env.DB, user, "CREATE", "broadcast_campaign", String(newId), { name })
+    );
+
+    return jsonResponse({ success: true, id: newId }, 201);
+  } catch (e) {
+    return jsonResponse({ error: "Failed to create broadcast campaign" }, 500);
+  }
+});
+
+app.put("/api/public/admin/broadcast-campaigns/:id", authMiddleware(["super_admin"]), async (c) => {
+  try {
+    const id = Number(c.req.param("id"));
+    const body = await c.req.json();
+    const { name, messageContent } = body;
     const updates: string[] = [];
     const values: any[] = [];
 
     if (name !== undefined) { updates.push("name = ?"); values.push(name); }
-    if (config !== undefined) { updates.push("config_json = ?"); values.push(JSON.stringify(config)); }
-    if (isActive !== undefined) { updates.push("is_active = ?"); values.push(isActive ? 1 : 0); }
-    values.push(key);
+    if (messageContent !== undefined) { updates.push("message_content = ?"); values.push(messageContent); }
+    updates.push("updated_at = ?");
+    values.push(Math.floor(Date.now() / 1000));
+    values.push(id);
 
     await c.env.DB.prepare(
-      `UPDATE campaigns SET ${updates.join(", ")} WHERE scenario_key = ?`
-    )
-      .bind(...values)
-      .run();
+      `UPDATE broadcast_campaigns SET ${updates.join(", ")} WHERE id = ?`
+    ).bind(...values).run();
 
     return jsonResponse({ success: true });
   } catch (e) {
-    return jsonResponse({ error: "Failed" }, 500);
+    return jsonResponse({ error: "Failed to update broadcast campaign" }, 500);
   }
 });
 
-app.delete("/api/public/admin/scenarios/:key", authMiddleware(["super_admin"]), async (c) => {
+app.delete("/api/public/admin/broadcast-campaigns/:id", authMiddleware(["super_admin"]), async (c) => {
   try {
-    const key = c.req.param("key");
-    await c.env.DB.prepare(`DELETE FROM campaigns WHERE scenario_key = ?`).bind(key).run();
+    const id = Number(c.req.param("id"));
+    await c.env.DB.prepare(`DELETE FROM broadcast_campaigns WHERE id = ?`).bind(id).run();
     return jsonResponse({ success: true });
   } catch (e) {
-    return jsonResponse({ error: "Failed" }, 500);
+    return jsonResponse({ error: "Failed to delete broadcast campaign" }, 500);
+  }
+});
+
+app.post("/api/public/admin/broadcast-batches", authMiddleware(["super_admin"]), async (c) => {
+  try {
+    const body = await c.req.json();
+    const { campaignId, name, phones, names, rateMinSeconds, rateMaxSeconds, waveSize, waveIntervalSeconds } = body;
+    if (!campaignId || !name || !phones || !Array.isArray(phones) || phones.length === 0) {
+      return jsonResponse({ error: "Missing required fields" }, 400);
+    }
+
+    const campaign = await c.env.DB.prepare(
+      `SELECT message_content FROM broadcast_campaigns WHERE id = ?`
+    ).bind(campaignId).first();
+    if (!campaign) {
+      return jsonResponse({ error: "Campaign not found" }, 404);
+    }
+
+    const user = c.get("adminUser") as AdminUser;
+    const now = Math.floor(Date.now() / 1000);
+    const targetCount = phones.length;
+
+    const batchResult = await c.env.DB.prepare(
+      `INSERT INTO broadcast_batches (campaign_id, name, target_count, status, rate_min_seconds, rate_max_seconds, wave_size, wave_interval_seconds, created_by, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    ).bind(
+      campaignId,
+      name,
+      targetCount,
+      "pending",
+      rateMinSeconds ?? 25,
+      rateMaxSeconds ?? 120,
+      waveSize ?? 50,
+      waveIntervalSeconds ?? 300,
+      user.id,
+      now,
+      now
+    ).run();
+
+    const batchId = batchResult.meta?.last_row_id;
+
+    const stmt = c.env.DB.prepare(
+      `INSERT INTO broadcast_logs (batch_id, campaign_id, customer_phone, customer_name, message_content, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)`
+    );
+    const messageContent = campaign.message_content;
+
+    for (let i = 0; i < phones.length; i++) {
+      const phone = phones[i];
+      const customerName = names && names[i] ? names[i] : null;
+      await stmt.bind(batchId, campaignId, phone, customerName, messageContent, "pending", now).run();
+    }
+
+    return jsonResponse({ batchId, targetCount });
+  } catch (e) {
+    return jsonResponse({ error: "Failed to create broadcast batch" }, 500);
+  }
+});
+
+app.get("/api/public/admin/broadcast-batches", authMiddleware(["super_admin"]), async (c) => {
+  try {
+    const { results } = await c.env.DB.prepare(
+      `SELECT b.*, c.name as campaign_name FROM broadcast_batches b LEFT JOIN broadcast_campaigns c ON b.campaign_id = c.id ORDER BY b.created_at DESC`
+    ).all();
+    return jsonResponse((results || []).map(snakeToCamel));
+  } catch (e) {
+    return jsonResponse({ error: "Failed to fetch broadcast batches" }, 500);
+  }
+});
+
+app.get("/api/public/admin/broadcast-batches/:id", authMiddleware(["super_admin"]), async (c) => {
+  try {
+    const id = Number(c.req.param("id"));
+    const row = await c.env.DB.prepare(
+      `SELECT b.*, c.name as campaign_name FROM broadcast_batches b LEFT JOIN broadcast_campaigns c ON b.campaign_id = c.id WHERE b.id = ?`
+    ).bind(id).first();
+    if (!row) return jsonResponse({ error: "Not found" }, 404);
+    return jsonResponse(snakeToCamel(row));
+  } catch (e) {
+    return jsonResponse({ error: "Failed to fetch broadcast batch" }, 500);
+  }
+});
+
+app.get("/api/public/admin/broadcast-batches/:id/logs", authMiddleware(["super_admin"]), async (c) => {
+  try {
+    const id = Number(c.req.param("id"));
+    const status = c.req.query("status") || "all";
+    let sql = `SELECT * FROM broadcast_logs WHERE batch_id = ?`;
+    const params: any[] = [id];
+    if (status !== "all") {
+      sql += ` AND status = ?`;
+      params.push(status);
+    }
+    sql += ` ORDER BY created_at DESC`;
+    const { results } = await c.env.DB.prepare(sql).bind(...params).all();
+    return jsonResponse((results || []).map(snakeToCamel));
+  } catch (e) {
+    return jsonResponse({ error: "Failed to fetch broadcast logs" }, 500);
+  }
+});
+
+app.post("/api/public/admin/broadcast-send", authMiddleware(["super_admin"]), async (c) => {
+  try {
+    const body = await c.req.json();
+    const { logId, phone, message } = body;
+    if (!logId || !phone || !message) {
+      return jsonResponse({ error: "Missing fields" }, 400);
+    }
+
+    const result = await sendWhatsAppMessage(c.env, phone, message);
+    const now = Math.floor(Date.now() / 1000);
+
+    let status: string;
+    let errorMsg: string | null = null;
+    if (result.success) {
+      status = "sent";
+    } else {
+      status = "failed";
+      errorMsg = result.error || "Unknown error";
+    }
+
+    await c.env.DB.prepare(
+      `UPDATE broadcast_logs SET status = ?, error_message = ?, sent_at = ? WHERE id = ?`
+    ).bind(status, errorMsg, now, logId).run();
+
+    const batchInfo = await c.env.DB.prepare(
+      `SELECT batch_id FROM broadcast_logs WHERE id = ?`
+    ).bind(logId).first();
+
+    if (batchInfo) {
+      const batchId = batchInfo.batch_id;
+      if (result.success) {
+        await c.env.DB.prepare(
+          `UPDATE broadcast_batches SET sent_count = sent_count + 1, updated_at = ? WHERE id = ?`
+        ).bind(now, batchId).run();
+      } else {
+        await c.env.DB.prepare(
+          `UPDATE broadcast_batches SET failed_count = failed_count + 1, updated_at = ? WHERE id = ?`
+        ).bind(now, batchId).run();
+      }
+
+      const counts = await c.env.DB.prepare(
+        `SELECT COUNT(*) as total, SUM(CASE WHEN status IN ('sent', 'failed') THEN 1 ELSE 0 END) as done FROM broadcast_logs WHERE batch_id = ?`
+      ).bind(batchId).first();
+
+      if (counts && counts.total === counts.done) {
+        await c.env.DB.prepare(
+          `UPDATE broadcast_batches SET status = 'completed', updated_at = ? WHERE id = ?`
+        ).bind(now, batchId).run();
+      }
+    }
+
+    return jsonResponse({ success: result.success, error: result.error });
+  } catch (e) {
+    return jsonResponse({ error: "Failed to send broadcast message" }, 500);
   }
 });
 

@@ -22,7 +22,7 @@ const ALL_MENU_ITEMS = [
   { id: 'products', label: '產品管理', icon: ChefHat, roles: ['super_admin', 'admin', 'supplier'], path: '/admin/products' },
   { id: 'package-configs', label: '套餐配置', icon: Briefcase, roles: ['super_admin', 'admin'], path: '/admin/package-configs' },
   { id: 'media-library', label: '媒體庫', icon: Image, roles: ['super_admin', 'admin', 'supplier'], path: '/admin/media-library' },
-  { id: 'campaigns', label: '行銷活動', icon: Briefcase, roles: ['super_admin'], path: '/admin/campaigns' },
+  { id: 'broadcast', label: '廣播推廣', icon: Briefcase, roles: ['super_admin'], path: '/admin/broadcast' },
   { id: 'users', label: '用戶管理', icon: Users, roles: ['super_admin'], path: '/admin/users' },
   { id: 'audit-logs', label: '操作日誌', icon: ClipboardList, roles: ['super_admin'], path: '/admin/audit-logs' },
   { id: 'settings', label: '系統設置', icon: Settings, roles: ['super_admin'], path: '/admin/settings' },

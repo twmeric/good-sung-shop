@@ -7,8 +7,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import AdminOrders from './pages/AdminOrders';
 import AdminOrderDetail from './pages/AdminOrderDetail';
 
-import AdminCampaigns from './pages/AdminCampaigns';
-import AdminCampaignSettings from './pages/AdminCampaignSettings';
+import AdminBroadcast from './pages/AdminBroadcast';
 import AdminProducts from './pages/AdminProducts';
 import AdminPackageConfigs from './pages/AdminPackageConfigs';
 import AdminMediaLibrary from './pages/AdminMediaLibrary';
@@ -78,14 +77,9 @@ function App() {
             <AdminMediaLibrary />
           </AdminRoute>
         } />
-        <Route path="/admin/campaigns" element={
+        <Route path="/admin/broadcast" element={
           <AdminRoute allowedRoles={['super_admin']}>
-            <AdminCampaigns />
-          </AdminRoute>
-        } />
-        <Route path="/admin/campaigns/:scenarioKey/settings" element={
-          <AdminRoute allowedRoles={['super_admin']}>
-            <AdminCampaignSettings />
+            <AdminBroadcast />
           </AdminRoute>
         } />
         <Route path="/admin/users" element={
