@@ -100,22 +100,10 @@ const AdminOrders: React.FC = () => {
 
   return (
     <AdminLayout currentPage="orders" onLogout={handleLogout}>
-      <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-xl font-bold text-gray-800">訂單列表</h2>
-        {hasActiveFilters && (
-          <button
-            onClick={clearFilters}
-            className="text-sm text-purple-600 hover:text-purple-800 font-medium"
-          >
-            清除所有篩選
-          </button>
-        )}
-      </div>
-
       {/* Filters */}
       <div className="mb-6 bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div>
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+          <div className="md:col-span-1">
             <label className="block text-xs font-medium text-gray-500 mb-1">搜尋</label>
             <input
               type="text"
@@ -125,7 +113,7 @@ const AdminOrders: React.FC = () => {
               onChange={e => handleFilterChange('searchTerm', e.target.value)}
             />
           </div>
-          <div>
+          <div className="md:col-span-2">
             <label className="block text-xs font-medium text-gray-500 mb-1">配送日期範圍</label>
             <div className="flex gap-2">
               <input
@@ -134,7 +122,7 @@ const AdminOrders: React.FC = () => {
                 value={filters.deliveryDateStart}
                 onChange={e => handleFilterChange('deliveryDateStart', e.target.value)}
               />
-              <span className="flex items-center text-gray-400">~</span>
+              <span className="flex items-center text-gray-400 px-1">~</span>
               <input
                 type="date"
                 className="w-full p-2.5 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-purple-500 outline-none text-sm"
@@ -143,7 +131,7 @@ const AdminOrders: React.FC = () => {
               />
             </div>
           </div>
-          <div>
+          <div className="md:col-span-1">
             <label className="block text-xs font-medium text-gray-500 mb-1">付款狀態</label>
             <select
               className="w-full p-2.5 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-purple-500 outline-none text-sm bg-white"
@@ -156,11 +144,19 @@ const AdminOrders: React.FC = () => {
               <option value="pending_proof">待審核</option>
             </select>
           </div>
-          <div className="flex items-end">
+          <div className="md:col-span-1 flex items-center justify-end gap-3">
             <div className="text-sm text-gray-500">
-              共 <span className="font-bold text-gray-800">{filteredOrders.length}</span> 筆訂單
-              {hasActiveFilters && <span className="text-purple-600">（已篩選）</span>}
+              共 <span className="font-bold text-gray-800">{filteredOrders.length}</span> 筆
+              {hasActiveFilters && <span className="text-purple-600 text-xs ml-1">（已篩選）</span>}
             </div>
+            {hasActiveFilters && (
+              <button
+                onClick={clearFilters}
+                className="text-xs text-purple-600 hover:text-purple-800 font-medium px-2 py-1 border border-purple-200 rounded hover:bg-purple-50"
+              >
+                清除
+              </button>
+            )}
           </div>
         </div>
       </div>

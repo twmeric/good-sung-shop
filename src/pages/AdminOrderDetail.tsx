@@ -213,29 +213,29 @@ const AdminOrderDetail: React.FC = () => {
             </div>
           </div>
 
-          {/* Order Edit Form */}
-          <form onSubmit={handleUpdate} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-bold text-gray-800 mb-4">訂單資料</h2>
+          {/* Order Info (Read Only) */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <h2 className="text-lg font-bold text-gray-800 mb-4">訂單資料（只讀）</h2>
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div>
                 <label className="block text-xs font-medium text-gray-500 mb-1 flex items-center gap-1"><User className="w-3 h-3" /> 姓名</label>
-                <input className="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 outline-none" value={order.name} onChange={e => setOrder({...order, name: e.target.value})} />
+                <div className="w-full p-2.5 bg-gray-100 border border-gray-200 rounded-lg text-sm text-gray-700">{order.name}</div>
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-500 mb-1 flex items-center gap-1"><Phone className="w-3 h-3" /> 電話</label>
-                <input className="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 outline-none" value={order.phone} onChange={e => setOrder({...order, phone: e.target.value})} />
+                <div className="w-full p-2.5 bg-gray-100 border border-gray-200 rounded-lg text-sm text-gray-700">{order.phone}</div>
               </div>
               <div className="col-span-2">
                 <label className="block text-xs font-medium text-gray-500 mb-1 flex items-center gap-1"><MapPin className="w-3 h-3" /> 地址</label>
-                <input className="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 outline-none" value={`${order.region} ${order.address}`} onChange={e => setOrder({...order, address: e.target.value})} />
+                <div className="w-full p-2.5 bg-gray-100 border border-gray-200 rounded-lg text-sm text-gray-700">{order.region} {order.address}</div>
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-500 mb-1 flex items-center gap-1"><Calendar className="w-3 h-3" /> 配送日期</label>
-                <input type="date" className="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 outline-none" value={order.deliveryDate} onChange={e => setOrder({...order, deliveryDate: e.target.value})} />
+                <div className="w-full p-2.5 bg-gray-100 border border-gray-200 rounded-lg text-sm text-gray-700">{order.deliveryDate}</div>
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-500 mb-1 flex items-center gap-1"><Clock className="w-3 h-3" /> 配送時間</label>
-                <input className="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 outline-none" value={order.deliveryTime} onChange={e => setOrder({...order, deliveryTime: e.target.value})} />
+                <div className="w-full p-2.5 bg-gray-100 border border-gray-200 rounded-lg text-sm text-gray-700">{order.deliveryTime || '—'}</div>
               </div>
             </div>
 
@@ -256,19 +256,23 @@ const AdminOrderDetail: React.FC = () => {
               </div>
             </div>
 
-            <div className="mb-4">
-              <label className="block text-xs font-medium text-gray-500 mb-1">客戶備註</label>
-              <textarea className="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 outline-none resize-none" rows={2} value={order.remarks || ''} onChange={e => setOrder({...order, remarks: e.target.value})} />
-            </div>
-            <div className="mb-4">
-              <label className="block text-xs font-medium text-gray-500 mb-1 text-red-500">管理員備註</label>
-              <textarea className="w-full p-2.5 border border-red-200 bg-red-50 rounded-lg text-sm focus:ring-2 focus:ring-red-500 outline-none resize-none" rows={2} value={order.adminRemarks || ''} onChange={e => setOrder({...order, adminRemarks: e.target.value})} />
-            </div>
-            <div className="flex gap-2">
-              <button type="submit" className="bg-purple-600 text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors">儲存變更</button>
-              <button type="button" onClick={() => navigate('/admin/orders')} className="bg-gray-200 text-gray-700 px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-300 transition-colors">取消</button>
-            </div>
-          </form>
+            {/* Admin Editable Section */}
+            <form onSubmit={handleUpdate} className="border-t border-gray-100 pt-4">
+              <h3 className="text-sm font-bold text-gray-700 mb-3">管理員編輯區</h3>
+              <div className="mb-4">
+                <label className="block text-xs font-medium text-gray-500 mb-1">客戶備註</label>
+                <textarea className="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 outline-none resize-none" rows={2} value={order.remarks || ''} onChange={e => setOrder({...order, remarks: e.target.value})} />
+              </div>
+              <div className="mb-4">
+                <label className="block text-xs font-medium text-gray-500 mb-1 text-red-500">管理員備註</label>
+                <textarea className="w-full p-2.5 border border-red-200 bg-red-50 rounded-lg text-sm focus:ring-2 focus:ring-red-500 outline-none resize-none" rows={2} value={order.adminRemarks || ''} onChange={e => setOrder({...order, adminRemarks: e.target.value})} />
+              </div>
+              <div className="flex gap-2">
+                <button type="submit" className="bg-purple-600 text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors">儲存備註</button>
+                <button type="button" onClick={() => navigate('/admin/orders')} className="bg-gray-200 text-gray-700 px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-300 transition-colors">取消</button>
+              </div>
+            </form>
+          </div>
         </div>
 
         {/* RIGHT: WhatsApp Chat (2/5) */}
