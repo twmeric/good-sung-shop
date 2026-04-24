@@ -15,12 +15,14 @@ interface DishItem {
   id: string;
   name: string;
   description?: string;
+  imageUrl?: string;
   enabled: boolean;
 }
 
 interface SoupItem {
   id: string;
   name: string;
+  imageUrl?: string;
   enabled: boolean;
 }
 
@@ -81,6 +83,7 @@ interface ApiProduct {
   stock_quantity: number;
   sort_order: number;
   max_select: number | null;
+  image_url: string | null;
 }
 
 interface PackageConfig {
@@ -202,6 +205,7 @@ const OrderLanding: React.FC = () => {
                 id: `d${p.id}`,
                 name: p.name,
                 description: p.description || '',
+                imageUrl: p.image_url || undefined,
                 enabled: p.is_active === 1,
               };
             });
@@ -215,6 +219,7 @@ const OrderLanding: React.FC = () => {
               return {
                 id: `s${p.id}`,
                 name: p.name,
+                imageUrl: p.image_url || undefined,
                 enabled: p.is_active === 1,
               };
             });
@@ -521,7 +526,7 @@ const OrderLanding: React.FC = () => {
           address: delivery.address,
           estate: delivery.estate,
           deliveryDate: delivery.deliveryDate,
-          deliveryTime: '10:00-13:00',
+          deliveryTime: '',
           name: delivery.name,
           phone: verifiedPhone,
           email: null,
@@ -657,13 +662,22 @@ const OrderLanding: React.FC = () => {
                     }`}
                   >
                     {isLowStock && (
-                      <span className="absolute -top-2 -right-2 bg-orange-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow">
+                      <span className="absolute -top-2 -right-2 bg-orange-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow z-10">
                         即將售罄
                       </span>
                     )}
-                    <div className={`w-8 h-8 mx-auto mb-2 rounded-full flex items-center justify-center ${isSelected ? 'bg-brand-500 text-white' : 'bg-gray-200'}`}>
-                      {isSelected ? <CheckCircle size={20} /> : <span className="text-sm">{dishes.indexOf(dish) + 1}</span>}
-                    </div>
+                    {dish.imageUrl ? (
+                      <div className="relative mb-2">
+                        <img src={dish.imageUrl} alt={dish.name} className="w-full aspect-square object-cover rounded-lg" />
+                        <div className={`absolute top-1 right-1 w-6 h-6 rounded-full flex items-center justify-center ${isSelected ? 'bg-brand-500 text-white' : 'bg-white/80 text-gray-600'}`}>
+                          {isSelected ? <CheckCircle size={14} /> : <span className="text-xs">{dishes.indexOf(dish) + 1}</span>}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className={`w-8 h-8 mx-auto mb-2 rounded-full flex items-center justify-center ${isSelected ? 'bg-brand-500 text-white' : 'bg-gray-200'}`}>
+                        {isSelected ? <CheckCircle size={20} /> : <span className="text-sm">{dishes.indexOf(dish) + 1}</span>}
+                      </div>
+                    )}
                     <div className="text-lg font-bold text-gray-800">{dish.name}</div>
                     <div className="text-sm text-gray-500">{dish.description}</div>
                   </button>
@@ -688,13 +702,22 @@ const OrderLanding: React.FC = () => {
                     }`}
                   >
                     {isLowStock && (
-                      <span className="absolute -top-2 -right-2 bg-orange-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow">
+                      <span className="absolute -top-2 -right-2 bg-orange-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow z-10">
                         即將售罄
                       </span>
                     )}
-                    <div className={`w-8 h-8 mx-auto mb-2 rounded-full flex items-center justify-center ${isSelected ? 'bg-brand-500 text-white' : 'bg-gray-200'}`}>
-                      {isSelected ? <CheckCircle size={20} /> : <span className="text-sm">{soups.indexOf(soup) + 1}</span>}
-                    </div>
+                    {soup.imageUrl ? (
+                      <div className="relative mb-2">
+                        <img src={soup.imageUrl} alt={soup.name} className="w-full aspect-square object-cover rounded-lg" />
+                        <div className={`absolute top-1 right-1 w-6 h-6 rounded-full flex items-center justify-center ${isSelected ? 'bg-brand-500 text-white' : 'bg-white/80 text-gray-600'}`}>
+                          {isSelected ? <CheckCircle size={14} /> : <span className="text-xs">{soups.indexOf(soup) + 1}</span>}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className={`w-8 h-8 mx-auto mb-2 rounded-full flex items-center justify-center ${isSelected ? 'bg-brand-500 text-white' : 'bg-gray-200'}`}>
+                        {isSelected ? <CheckCircle size={20} /> : <span className="text-sm">{soups.indexOf(soup) + 1}</span>}
+                      </div>
+                    )}
                     <div className="text-lg font-bold text-gray-800">{soup.name}</div>
                   </button>
                 );

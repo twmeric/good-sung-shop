@@ -261,6 +261,15 @@ const AdminProducts: React.FC = () => {
                   placeholder="數量"
                 />
               </div>
+              <div className="md:col-span-3">
+                <label className="block text-sm font-medium text-gray-700 mb-1">圖片 URL</label>
+                <input
+                  value={newProduct.image_url || ''}
+                  onChange={e => setNewProduct({ ...newProduct, image_url: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  placeholder="https://...（可從媒體庫複製）"
+                />
+              </div>
             </div>
             <div className="mt-4 flex gap-2">
               <button onClick={handleAdd} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">創建</button>
@@ -283,6 +292,7 @@ const AdminProducts: React.FC = () => {
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">描述</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">價格</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">庫存</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">圖片</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">狀態</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">操作</th>
                 </tr>
@@ -364,6 +374,22 @@ const AdminProducts: React.FC = () => {
                             {product.stock_quantity === 0 && <span className="ml-1 text-xs">(缺貨)</span>}
                             {product.stock_quantity > 0 && product.stock_quantity < 15 && <span className="ml-1 text-xs">(即將售罄)</span>}
                           </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-sm">
+                        {isEditing ? (
+                          <input
+                            value={editForm.image_url || ''}
+                            onChange={e => setEditForm({ ...editForm, image_url: e.target.value })}
+                            className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                            placeholder="圖片URL"
+                          />
+                        ) : (
+                          product.image_url ? (
+                            <img src={product.image_url} alt={product.name} className="w-10 h-10 object-cover rounded" />
+                          ) : (
+                            <span className="text-gray-400 text-xs">-</span>
+                          )
                         )}
                       </td>
                       <td className="px-4 py-3">

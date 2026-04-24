@@ -40,8 +40,15 @@ const getOrderStatus = (order: Order) => {
   return { label: '未知', color: 'bg-gray-100 text-gray-700' };
 };
 
+interface ProductItem {
+  id: number;
+  name: string;
+  category: string;
+}
+
 const AdminOrders: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
+  const [products, setProducts] = useState<ProductItem[]>([]);
   const [filters, setFilters] = useState<Filters>({
     searchTerm: '',
     deliveryDateStart: '',
@@ -57,7 +64,16 @@ const AdminOrders: React.FC = () => {
       return;
     }
     fetchOrders();
+    fetchProducts();
   }, []);
+
+  const fetchProducts = async () => {
+    const res = await apiFetch('/api/public/admin/products');
+    if (res.ok) {
+      const data = await res.json();
+      setProducts(data.filter((p: any) => p.category === 'dish' || p.category === 'soup'));
+    }
+  };
 
   const fetchOrders = async () => {
     const res = await apiFetch('/api/public/admin/orders');
@@ -110,35 +126,50 @@ const AdminOrders: React.FC = () => {
   };
 
   const exportToCSV = () => {
-    const headers = ['訂單號', '下單日期', '姓名', '電話', '屋苑', '地址', '配送日期', '產品詳情', '總額(HK$)', '付款狀態', '訂單狀態', '備註'];
-    const rows = filteredOrders.map(order => {
-      let productDetail = '';
-      try {
-        const items = JSON.parse(order.items || '[]');
-        productDetail = items.map((item: any) => {
-          const pkg = item.packageType === '2-dish-1-soup' ? '2餸1湯' : '3餸1湯';
-          const dishes = (item.selectedDishes || []).join('+');
-          const soup = item.selectedSoup || '';
-          return `${pkg}x${item.quantity}(${dishes};${soup})`;
-        }).join('; ');
-      } catch { productDetail = ''; }
+    // Build product columns dynamically from current products
+    const dishProducts = products.filter(p => p.category === 'dish').map(p => p.name);
+    const soupProducts = products.filter(p => p.category === 'soup').map(p => p.name);
 
+    const baseHeaders = ['訂單號', '下單日期', '姓名', '電話', '屋苑', '配送日期', '總額(HK$)', '付款狀態', '訂單狀態'];
+    const productHeaders = [...dishProducts, ...soupProducts];
+    const headers = [...baseHeaders, ...productHeaders];
+
+    const rows = filteredOrders.map(order => {
       const status = getOrderStatus(order);
 
-      return [
+      // Count each product in this order
+      const productCounts: Record<string, number> = {};
+      for (const p of productHeaders) productCounts[p] = 0;
+
+      try {
+        const items = JSON.parse(order.items || '[]');
+        for (const item of items) {
+          const qty = item.quantity || 1;
+          for (const dishName of (item.selectedDishes || [])) {
+            if (productCounts[dishName] !== undefined) {
+              productCounts[dishName] += qty;
+            }
+          }
+          if (item.selectedSoup && productCounts[item.selectedSoup] !== undefined) {
+            productCounts[item.selectedSoup] += qty;
+          }
+        }
+      } catch { /* ignore */ }
+
+      const baseRow = [
         order.orderNum || String(order.createdAt).slice(-4),
         new Date(order.createdAt * 1000).toLocaleDateString('zh-HK'),
         order.name,
         order.phone,
         order.estate || '',
-        '', // address not in current data
         order.deliveryDate,
-        productDetail,
         order.totalPrice,
         order.paymentConfirmed === 1 ? '已付款' : order.paymentProof ? '待審核' : '未付款',
         status.label,
-        '', // remarks not in current data
       ];
+
+      const productRow = productHeaders.map(name => productCounts[name] || 0);
+      return [...baseRow, ...productRow];
     });
 
     const csvContent = [headers, ...rows]

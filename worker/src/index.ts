@@ -799,7 +799,8 @@ app.post("/api/public/orders", async (c) => {
       .join(", ");
 
     const proofUrl = `${c.env.SITE_URL}/payment-proof/${orderNum}`;
-    const orderMsg = `【好餸社企 - 訂單確認】\n\n訂單號碼: ${orderNum}\n產品: ${dishSummary}\n總額: HK$${totalPrice}\n姓名: ${body.name}\n電話: ${fullPhone}\n地址: ${body.address}\n日期: ${body.deliveryDate} ${body.deliveryTime}\n\n💳 請付款至：\n${DEFAULT_CMS.bank.account}\n${DEFAULT_CMS.bank.fps}\n名稱: ${DEFAULT_CMS.bank.companyName}\n\n📤 上傳付款憑證：\n${proofUrl}\n\n感謝您的支持！`;
+    const deliveryTimeStr = body.deliveryTime ? ` ${body.deliveryTime}` : '';
+    const orderMsg = `【好餸社企 - 訂單確認】\n\n訂單號碼: ${orderNum}\n產品: ${dishSummary}\n總額: HK$${totalPrice}\n姓名: ${body.name}\n電話: ${fullPhone}\n地址: ${body.address}\n日期: ${body.deliveryDate}${deliveryTimeStr}\n\n💳 請付款至：\n${DEFAULT_CMS.bank.account}\n${DEFAULT_CMS.bank.fps}\n名稱: ${DEFAULT_CMS.bank.companyName}\n\n📤 上傳付款憑證：\n${proofUrl}\n\n感謝您的支持！`;
 
     // Send to customer
     const sendPromise = sendWhatsAppMessage(c.env, fullPhone, orderMsg);
@@ -1424,6 +1425,81 @@ app.get("/api/public/package-configs", async (c) => {
     return jsonResponse(configs);
   } catch (e) {
     return jsonResponse({ error: "Failed to fetch package configs" }, 500);
+  }
+});
+
+// --------------------------------------------------
+// Admin: Media Library
+// --------------------------------------------------
+app.post("/api/public/admin/media/upload", authMiddleware(), async (c) => {
+  try {
+    const body = await c.req.parseBody();
+    const file = body.file as File;
+    if (!file) {
+      return jsonResponse({ error: "No file uploaded" }, 400);
+    }
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      return jsonResponse({ error: "Only image files are allowed" }, 400);
+    }
+
+    // Generate unique filename
+    const ext = file.name.split(".").pop() || "jpg";
+    const key = `media/${Date.now()}_${Math.random().toString(36).substring(2, 10)}.${ext}`;
+
+    await c.env.PAYMENT_PROOFS.put(key, file.stream(), {
+      httpMetadata: { contentType: file.type },
+    });
+
+    const publicUrl = `https://good-sung-shop.jimsbond007.workers.dev/media/${key.replace("media/", "")}`;
+    return jsonResponse({ success: true, url: publicUrl, key });
+  } catch (e) {
+    return jsonResponse({ error: "Failed to upload file" }, 500);
+  }
+});
+
+app.get("/api/public/admin/media", authMiddleware(), async (c) => {
+  try {
+    const listed = await c.env.PAYMENT_PROOFS.list({ prefix: "media/" });
+    const items = (listed.objects || []).map(obj => ({
+      key: obj.key,
+      name: obj.key.replace("media/", ""),
+      size: obj.size,
+      uploaded: obj.uploaded,
+      url: `https://good-sung-shop.jimsbond007.workers.dev/media/${obj.key.replace("media/", "")}`,
+    }));
+    return jsonResponse(items);
+  } catch (e) {
+    return jsonResponse({ error: "Failed to list media" }, 500);
+  }
+});
+
+app.delete("/api/public/admin/media/:name", authMiddleware(), async (c) => {
+  try {
+    const name = c.req.param("name");
+    await c.env.PAYMENT_PROOFS.delete(`media/${name}`);
+    return jsonResponse({ success: true });
+  } catch (e) {
+    return jsonResponse({ error: "Failed to delete media" }, 500);
+  }
+});
+
+// Public media access
+app.get("/media/:name", async (c) => {
+  try {
+    const name = c.req.param("name");
+    const obj = await c.env.PAYMENT_PROOFS.get(`media/${name}`);
+    if (!obj) {
+      return new Response("Not found", { status: 404 });
+    }
+    const headers = new Headers();
+    obj.writeHttpMetadata(headers);
+    headers.set("etag", obj.httpEtag);
+    headers.set("Access-Control-Allow-Origin", "*");
+    return new Response(obj.body, { headers });
+  } catch (e) {
+    return new Response("Failed to fetch media", { status: 500 });
   }
 });
 

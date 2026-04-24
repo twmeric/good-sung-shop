@@ -11,6 +11,7 @@ import AdminCampaigns from './pages/AdminCampaigns';
 import AdminCampaignSettings from './pages/AdminCampaignSettings';
 import AdminProducts from './pages/AdminProducts';
 import AdminPackageConfigs from './pages/AdminPackageConfigs';
+import AdminMediaLibrary from './pages/AdminMediaLibrary';
 import AdminUsers from './pages/AdminUsers';
 import AdminSettings from './pages/AdminSettings';
 import AdminAuditLogs from './pages/AdminAuditLogs';
@@ -70,6 +71,11 @@ function App() {
         <Route path="/admin/package-configs" element={
           <AdminRoute allowedRoles={['super_admin', 'admin']}>
             <AdminPackageConfigs />
+          </AdminRoute>
+        } />
+        <Route path="/admin/media-library" element={
+          <AdminRoute allowedRoles={['super_admin', 'admin']}>
+            <AdminMediaLibrary />
           </AdminRoute>
         } />
         <Route path="/admin/campaigns" element={
