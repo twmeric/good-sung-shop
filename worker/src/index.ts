@@ -1932,6 +1932,70 @@ app.delete("/api/admin/users/:id", authMiddleware(["super_admin"]), async (c) =>
   }
 });
 
+// POST /api/admin/users/send-credentials
+// Reset passwords and send login credentials via WhatsApp to all admin/supplier users
+app.post("/api/admin/users/send-credentials", authMiddleware(["super_admin"]), async (c) => {
+  try {
+    const { results } = await c.env.DB.prepare(
+      `SELECT id, username, role, display_name, phone FROM admin_users WHERE role IN ('admin', 'supplier') AND phone IS NOT NULL AND phone != '' AND is_active = 1`
+    ).all();
+
+    const users = results || [];
+    if (users.length === 0) {
+      return jsonResponse({ error: "No admin/supplier users with phone found" }, 404);
+    }
+
+    const now = Math.floor(Date.now() / 1000);
+    const results_arr: any[] = [];
+
+    for (const u of users as any[]) {
+      // Generate random 8-char password
+      const chars = "ABCDEFGHJKMNPQRSTUVWXYabcdefghjkmnpqrstuvwxy23456789";
+      let password = "";
+      for (let i = 0; i < 8; i++) {
+        password += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+
+      // Hash and update
+      const hash = await hashPassword(password);
+      await c.env.DB.prepare(
+        `UPDATE admin_users SET password_hash = ?, updated_at = ? WHERE id = ?`
+      ).bind(hash, now, u.id).run();
+
+      // Send WhatsApp
+      const roleLabel = u.role === 'admin' ? '管理員' : '產品供應商';
+      const msg = `【好餸管理後台】\n\n您的登入資料已更新！\n\n用戶名：${u.username}\n密碼：${password}\n角色：${roleLabel}\n\n登入網址：\nhttps://goodstore.jkdcoding.com/admin\n\n請妥善保存您的登入資料。`;
+
+      let sendResult: any = { success: false };
+      try {
+        sendResult = await sendWhatsAppMessage(c.env, u.phone, msg);
+      } catch (e: any) {
+        sendResult = { success: false, error: e.message };
+      }
+
+      results_arr.push({
+        id: u.id,
+        username: u.username,
+        phone: u.phone,
+        role: u.role,
+        sent: sendResult.success,
+        error: sendResult.error || null
+      });
+    }
+
+    const sentCount = results_arr.filter((r: any) => r.sent).length;
+    return jsonResponse({
+      success: true,
+      total: users.length,
+      sent: sentCount,
+      failed: users.length - sentCount,
+      results: results_arr
+    });
+  } catch (e: any) {
+    return jsonResponse({ error: "Failed to send credentials", detail: e.message }, 500);
+  }
+});
+
 // --------------------------------------------------
 // Admin: System Settings (Super Admin only)
 // --------------------------------------------------

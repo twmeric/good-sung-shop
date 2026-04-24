@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Edit2, Save, X, ToggleLeft, ToggleRight, Trash2, KeyRound } from 'lucide-react';
+import { Plus, Edit2, Save, X, ToggleLeft, ToggleRight, Trash2, KeyRound, MessageCircle } from 'lucide-react';
 import AdminLayout from '../components/AdminLayout';
 
 const API_BASE = 'https://good-sung-shop.jimsbond007.workers.dev';
@@ -229,14 +229,38 @@ const AdminUsers: React.FC = () => {
           </div>
         )}
 
-        {/* Create Button */}
-        <div className="mb-6">
+        {/* Action Buttons */}
+        <div className="mb-6 flex gap-3">
           <button
             onClick={() => setShowForm(!showForm)}
-            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="flex items-center px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700"
           >
             <Plus className="w-5 h-5 mr-2" />
             {showForm ? '取消' : '新增管理員'}
+          </button>
+          <button
+            onClick={async () => {
+              if (!confirm('確定要重置所有 admin/supplier 的密碼並發送到 WhatsApp 嗎？')) return;
+              try {
+                const res = await fetch(`${API_BASE}/api/admin/users/send-credentials`, {
+                  method: 'POST',
+                  headers: { Authorization: `Bearer ${token}` },
+                });
+                const data = await res.json();
+                if (res.ok) {
+                  setSuccess(`已發送 ${data.sent}/${data.total} 位用戶的登入資料`);
+                  setTimeout(() => setSuccess(null), 5000);
+                } else {
+                  setError(data.error || '發送失敗');
+                }
+              } catch (e) {
+                setError('發送失敗');
+              }
+            }}
+            className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+          >
+            <MessageCircle className="w-5 h-5 mr-2" />
+            發送登入資料到 WhatsApp
           </button>
         </div>
 
