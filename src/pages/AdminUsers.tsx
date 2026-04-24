@@ -241,34 +241,34 @@ const AdminUsers: React.FC = () => {
 
         {/* Create Form */}
         {showForm && (
-          <div className="bg-white rounded-lg shadow p-6 mb-6 border-l-4 border-blue-500">
-            <h3 className="text-lg font-bold mb-4">新增管理員</h3>
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6 border-l-4 border-blue-500">
+            <h3 className="text-lg font-bold mb-4 dark:text-white">新增管理員</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">帳號 *</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">帳號 *</label>
                 <input
                   value={formData.username}
                   onChange={e => setFormData({ ...formData, username: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:text-white"
                   placeholder="username"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">密碼 *</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">密碼 *</label>
                 <input
                   type="password"
                   value={formData.password}
                   onChange={e => setFormData({ ...formData, password: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:text-white"
                   placeholder="password"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">角色</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">角色</label>
                 <select
                   value={formData.role}
                   onChange={e => setFormData({ ...formData, role: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:text-white"
                 >
                   <option value="admin">管理員</option>
                   <option value="supplier">產品供應商</option>
@@ -276,20 +276,20 @@ const AdminUsers: React.FC = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">顯示名稱</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">顯示名稱</label>
                 <input
                   value={formData.display_name}
                   onChange={e => setFormData({ ...formData, display_name: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:text-white"
                   placeholder="顯示名稱"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">WhatsApp</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">WhatsApp</label>
                 <input
                   value={formData.phone}
                   onChange={e => setFormData({ ...formData, phone: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:text-white"
                   placeholder="852xxxxxxx"
                 />
               </div>
@@ -301,45 +301,45 @@ const AdminUsers: React.FC = () => {
                     onChange={e => setFormData({ ...formData, is_active: e.target.checked })}
                     className="w-4 h-4"
                   />
-                  <span className="text-sm">啟用</span>
+                  <span className="text-sm dark:text-gray-300">啟用</span>
                 </label>
               </div>
             </div>
             <div className="mt-4 flex gap-2">
               <button onClick={handleCreate} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">創建</button>
-              <button onClick={() => setShowForm(false)} className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">取消</button>
+              <button onClick={() => setShowForm(false)} className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600">取消</button>
             </div>
           </div>
         )}
 
         {/* Users Table */}
         {loading ? (
-          <div className="bg-white rounded shadow p-8 text-center text-gray-500">加載中...</div>
+          <div className="bg-white dark:bg-gray-800 rounded shadow p-8 text-center text-gray-500 dark:text-gray-400">加載中...</div>
         ) : (
-          <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
             <table className="min-w-full">
-              <thead className="bg-gray-50">
+              <thead className="bg-gray-50 dark:bg-gray-900">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">帳號</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">名稱</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">角色</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">WhatsApp</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">狀態</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">操作</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">ID</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">帳號</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">名稱</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">角色</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">WhatsApp</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">狀態</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">操作</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                 {users.map(user => (
-                  <tr key={user.id} className="hover:bg-gray-50">
+                  <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                     <td className="px-4 py-3 text-sm">{user.id}</td>
-                    <td className="px-4 py-3 font-medium text-gray-900">{user.username}</td>
+                    <td className="px-4 py-3 font-medium text-gray-900 dark:text-white">{user.username}</td>
                     <td className="px-4 py-3">
                       {editingId === user.id ? (
                         <input
                           value={editData.display_name || ''}
                           onChange={e => setEditData({ ...editData, display_name: e.target.value })}
-                          className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                          className="w-full px-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-sm bg-white dark:bg-gray-800 dark:text-white"
                         />
                       ) : (
                         user.display_name || '-'
@@ -350,7 +350,7 @@ const AdminUsers: React.FC = () => {
                         <select
                           value={editData.role || ''}
                           onChange={e => setEditData({ ...editData, role: e.target.value })}
-                          className="px-2 py-1 border border-gray-300 rounded text-sm"
+                          className="px-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-sm bg-white dark:bg-gray-800 dark:text-white"
                         >
                           <option value="admin">管理員</option>
                           <option value="supplier">產品供應商</option>
@@ -371,7 +371,7 @@ const AdminUsers: React.FC = () => {
                         <input
                           value={editData.phone || ''}
                           onChange={e => setEditData({ ...editData, phone: e.target.value })}
-                          className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                          className="w-full px-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-sm bg-white dark:bg-gray-800 dark:text-white"
                         />
                       ) : (
                         user.phone || '-'
@@ -404,7 +404,7 @@ const AdminUsers: React.FC = () => {
               </tbody>
             </table>
             {users.length === 0 && (
-              <div className="p-8 text-center text-gray-500">沒有用戶</div>
+              <div className="p-8 text-center text-gray-500 dark:text-gray-400">沒有用戶</div>
             )}
           </div>
         )}
@@ -412,15 +412,15 @@ const AdminUsers: React.FC = () => {
         {/* Reset Password Modal */}
         {resetPasswordId && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 max-w-sm w-full">
-              <h3 className="text-lg font-bold mb-4">重置密碼</h3>
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-sm w-full">
+              <h3 className="text-lg font-bold mb-4 dark:text-white">重置密碼</h3>
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">新密碼</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">新密碼</label>
                 <input
                   type="password"
                   value={newPassword}
                   onChange={e => setNewPassword(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:text-white"
                   placeholder="輸入新密碼"
                   autoFocus
                 />
@@ -428,7 +428,7 @@ const AdminUsers: React.FC = () => {
               <div className="flex gap-2">
                 <button
                   onClick={() => { setResetPasswordId(null); setNewPassword(''); }}
-                  className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+                  className="flex-1 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600"
                 >
                   取消
                 </button>

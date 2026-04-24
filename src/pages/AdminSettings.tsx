@@ -125,22 +125,22 @@ const AdminSettings: React.FC = () => {
         )}
 
         {loading ? (
-          <div className="bg-white rounded shadow p-8 text-center text-gray-500">加載中...</div>
+          <div className="bg-white dark:bg-gray-800 rounded shadow p-8 text-center text-gray-500 dark:text-gray-400">加載中...</div>
         ) : (
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-6">系統設置</h2>
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">系統設置</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {Object.entries(settings).map(([key, item]) => (
                 <div key={key}>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     {item.description}
-                    <span className="ml-2 text-xs text-gray-400 font-mono">({key})</span>
+                    <span className="ml-2 text-xs text-gray-400 dark:text-gray-500 font-mono">({key})</span>
                   </label>
                   <input
                     value={item.value}
                     onChange={e => updateSetting(key, e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none dark:bg-gray-800 dark:text-white"
                   />
                 </div>
               ))}

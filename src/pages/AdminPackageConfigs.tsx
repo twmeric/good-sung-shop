@@ -187,119 +187,119 @@ const AdminPackageConfigs: React.FC = () => {
 
         {/* Add Form */}
         {showAddForm && (
-          <div className="bg-white rounded-lg shadow p-6 mb-6 border-l-4 border-blue-500">
-            <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6 border-l-4 border-blue-500">
+            <h3 className="text-lg font-bold mb-4 dark:text-white flex items-center gap-2">
               <Package className="w-5 h-5 text-blue-600" />
               新增套餐配置
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">類型鍵 *</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">類型鍵 *</label>
                 <input
                   value={newConfig.typeKey || ''}
                   onChange={e => setNewConfig({ ...newConfig, typeKey: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:text-white"
                   placeholder="例如：family-set"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">名稱 *</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">名稱 *</label>
                 <input
                   value={newConfig.name || ''}
                   onChange={e => setNewConfig({ ...newConfig, name: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:text-white"
                   placeholder="套餐名稱"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">價格</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">價格</label>
                 <input
                   type="number"
                   value={newConfig.price ?? ''}
                   onChange={e => setNewConfig({ ...newConfig, price: e.target.value ? parseInt(e.target.value) : 0 })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:text-white"
                   placeholder="HK$"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">餸菜數</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">餸菜數</label>
                 <input
                   type="number"
                   value={newConfig.dishCount ?? ''}
                   onChange={e => setNewConfig({ ...newConfig, dishCount: e.target.value ? parseInt(e.target.value) : 0 })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:text-white"
                   placeholder="0"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">湯數</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">湯數</label>
                 <input
                   type="number"
                   value={newConfig.soupCount ?? ''}
                   onChange={e => setNewConfig({ ...newConfig, soupCount: e.target.value ? parseInt(e.target.value) : 0 })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:text-white"
                   placeholder="0"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">排序</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">排序</label>
                 <input
                   type="number"
                   value={newConfig.sortOrder ?? ''}
                   onChange={e => setNewConfig({ ...newConfig, sortOrder: e.target.value ? parseInt(e.target.value) : 0 })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:text-white"
                   placeholder="0"
                 />
               </div>
             </div>
             <div className="mt-4 flex gap-2">
               <button onClick={handleAdd} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">創建</button>
-              <button onClick={() => setShowAddForm(false)} className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">取消</button>
+              <button onClick={() => setShowAddForm(false)} className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600">取消</button>
             </div>
           </div>
         )}
 
         {/* Configs Table */}
         {loading ? (
-          <div className="bg-white rounded shadow p-8 text-center text-gray-500">加載中...</div>
+          <div className="bg-white dark:bg-gray-800 rounded shadow p-8 text-center text-gray-500 dark:text-gray-400">加載中...</div>
         ) : (
-          <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
             <table className="min-w-full">
-              <thead className="bg-gray-50">
+              <thead className="bg-gray-50 dark:bg-gray-900">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">名稱</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">類型鍵</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">價格</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">餸菜數</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">湯數</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">排序</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">狀態</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">操作</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">名稱</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">類型鍵</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">價格</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">餸菜數</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">湯數</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">排序</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">狀態</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">操作</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                 {configs.map(config => (
-                  <tr key={config.id} className="hover:bg-gray-50">
+                  <tr key={config.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                     <td className="px-4 py-3">
                       {isEditing(config.id) ? (
                         <input
                           value={editForm.name || ''}
                           onChange={e => setEditForm({ ...editForm, name: e.target.value })}
-                          className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                          className="w-full px-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-sm bg-white dark:bg-gray-800 dark:text-white"
                         />
                       ) : (
-                        <span className="font-medium text-gray-900">{config.name}</span>
+                        <span className="font-medium text-gray-900 dark:text-white">{config.name}</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-600">
+                    <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
                       {isEditing(config.id) ? (
                         <input
                           value={editForm.typeKey || ''}
                           onChange={e => setEditForm({ ...editForm, typeKey: e.target.value })}
-                          className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                          className="w-full px-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-sm bg-white dark:bg-gray-800 dark:text-white"
                         />
                       ) : (
-                        <code className="bg-gray-100 px-2 py-0.5 rounded text-xs">{config.typeKey}</code>
+                        <code className="bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded text-xs">{config.typeKey}</code>
                       )}
                     </td>
                     <td className="px-4 py-3 text-sm">
@@ -308,7 +308,7 @@ const AdminPackageConfigs: React.FC = () => {
                           type="number"
                           value={editForm.price ?? ''}
                           onChange={e => setEditForm({ ...editForm, price: e.target.value ? parseInt(e.target.value) : 0 })}
-                          className="w-24 px-2 py-1 border border-gray-300 rounded text-sm"
+                          className="w-24 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-sm bg-white dark:bg-gray-800 dark:text-white"
                         />
                       ) : (
                         `HK$${config.price}`
@@ -320,7 +320,7 @@ const AdminPackageConfigs: React.FC = () => {
                           type="number"
                           value={editForm.dishCount ?? ''}
                           onChange={e => setEditForm({ ...editForm, dishCount: e.target.value ? parseInt(e.target.value) : 0 })}
-                          className="w-20 px-2 py-1 border border-gray-300 rounded text-sm"
+                          className="w-20 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-sm bg-white dark:bg-gray-800 dark:text-white"
                         />
                       ) : (
                         config.dishCount
@@ -332,7 +332,7 @@ const AdminPackageConfigs: React.FC = () => {
                           type="number"
                           value={editForm.soupCount ?? ''}
                           onChange={e => setEditForm({ ...editForm, soupCount: e.target.value ? parseInt(e.target.value) : 0 })}
-                          className="w-20 px-2 py-1 border border-gray-300 rounded text-sm"
+                          className="w-20 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-sm bg-white dark:bg-gray-800 dark:text-white"
                         />
                       ) : (
                         config.soupCount
@@ -344,7 +344,7 @@ const AdminPackageConfigs: React.FC = () => {
                           type="number"
                           value={editForm.sortOrder ?? ''}
                           onChange={e => setEditForm({ ...editForm, sortOrder: e.target.value ? parseInt(e.target.value) : 0 })}
-                          className="w-20 px-2 py-1 border border-gray-300 rounded text-sm"
+                          className="w-20 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-sm bg-white dark:bg-gray-800 dark:text-white"
                         />
                       ) : (
                         config.sortOrder
@@ -377,7 +377,7 @@ const AdminPackageConfigs: React.FC = () => {
               </tbody>
             </table>
             {configs.length === 0 && (
-              <div className="p-8 text-center text-gray-500">沒有套餐配置</div>
+              <div className="p-8 text-center text-gray-500 dark:text-gray-400">沒有套餐配置</div>
             )}
           </div>
         )}

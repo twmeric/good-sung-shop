@@ -74,7 +74,7 @@ function App() {
           </AdminRoute>
         } />
         <Route path="/admin/media-library" element={
-          <AdminRoute allowedRoles={['super_admin', 'admin']}>
+          <AdminRoute allowedRoles={['super_admin', 'admin', 'supplier']}>
             <AdminMediaLibrary />
           </AdminRoute>
         } />

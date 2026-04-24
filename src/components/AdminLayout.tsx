@@ -1,6 +1,6 @@
 import React, { ReactNode } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Menu, X, LogOut, LayoutDashboard, ShoppingCart, ChefHat, Briefcase, BarChart3, Users, ClipboardList, Settings, Image } from 'lucide-react';
+import { Menu, X, LogOut, LayoutDashboard, ShoppingCart, ChefHat, Briefcase, Users, ClipboardList, Settings, Image, Moon, Sun } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 interface AdminLayoutProps {
@@ -21,7 +21,7 @@ const ALL_MENU_ITEMS = [
   { id: 'orders', label: '訂單管理', icon: ShoppingCart, roles: ['super_admin', 'admin'], path: '/admin/orders' },
   { id: 'products', label: '產品管理', icon: ChefHat, roles: ['super_admin', 'admin', 'supplier'], path: '/admin/products' },
   { id: 'package-configs', label: '套餐配置', icon: Briefcase, roles: ['super_admin', 'admin'], path: '/admin/package-configs' },
-  { id: 'media-library', label: '媒體庫', icon: Image, roles: ['super_admin', 'admin'], path: '/admin/media-library' },
+  { id: 'media-library', label: '媒體庫', icon: Image, roles: ['super_admin', 'admin', 'supplier'], path: '/admin/media-library' },
   { id: 'campaigns', label: '行銷活動', icon: Briefcase, roles: ['super_admin'], path: '/admin/campaigns' },
   { id: 'users', label: '用戶管理', icon: Users, roles: ['super_admin'], path: '/admin/users' },
   { id: 'audit-logs', label: '操作日誌', icon: ClipboardList, roles: ['super_admin'], path: '/admin/audit-logs' },
@@ -33,6 +33,10 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPage, onLogo
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [user, setUser] = useState<AdminUser | null>(null);
+  const [isDark, setIsDark] = useState(() => {
+    const saved = localStorage.getItem('admin_theme');
+    return saved === 'dark';
+  });
 
   useEffect(() => {
     const stored = localStorage.getItem('admin_user');
@@ -42,6 +46,10 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPage, onLogo
       } catch { /* ignore */ }
     }
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem('admin_theme', isDark ? 'dark' : 'light');
+  }, [isDark]);
 
   const menuItems = ALL_MENU_ITEMS.filter(item =>
     user?.role ? item.roles.includes(user.role) : true
@@ -73,29 +81,29 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPage, onLogo
   };
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className={`flex h-screen ${isDark ? 'dark' : ''}`}>
       {/* Sidebar */}
       <div
         className={`${
           sidebarOpen ? 'w-64' : 'w-20'
-        } bg-gradient-to-b from-purple-700 to-purple-900 text-white transition-all duration-300 flex flex-col shadow-lg`}
+        } bg-gradient-to-b from-orange-600 to-orange-800 text-white transition-all duration-300 flex flex-col shadow-lg dark:from-gray-900 dark:to-gray-950`}
       >
         {/* Logo/Header */}
-        <div className="h-20 flex items-center justify-between px-4 border-b border-purple-600">
+        <div className="h-20 flex items-center justify-between px-4 border-b border-orange-500/50 dark:border-gray-700">
           <div className={`flex items-center gap-2 ${!sidebarOpen && 'justify-center w-full'}`}>
             <div className="bg-white rounded-lg p-2">
-              <LayoutDashboard className="text-purple-700" size={20} />
+              <LayoutDashboard className="text-orange-600" size={20} />
             </div>
             {sidebarOpen && (
               <div className="flex flex-col">
                 <span className="font-bold text-white text-sm">好餸</span>
-                <span className="text-xs text-purple-200">管理後台</span>
+                <span className="text-xs text-orange-200 dark:text-gray-400">管理後台</span>
               </div>
             )}
           </div>
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="text-purple-200 hover:text-white transition-colors"
+            className="text-orange-200 hover:text-white transition-colors dark:text-gray-400"
           >
             {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
@@ -103,9 +111,9 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPage, onLogo
 
         {/* User Info */}
         {sidebarOpen && user && (
-          <div className="px-4 py-3 border-b border-purple-600">
+          <div className="px-4 py-3 border-b border-orange-500/50 dark:border-gray-700">
             <div className="text-sm font-semibold">{user.display_name || user.username}</div>
-            <div className="text-xs text-purple-200">{getRoleLabel(user.role)}</div>
+            <div className="text-xs text-orange-200 dark:text-gray-400">{getRoleLabel(user.role)}</div>
           </div>
         )}
 
@@ -120,8 +128,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPage, onLogo
                 onClick={() => navigate(item.path)}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
                   isActive
-                    ? 'bg-white text-purple-700 shadow-md font-semibold'
-                    : 'text-purple-100 hover:bg-purple-600 hover:text-white'
+                    ? 'bg-white text-orange-700 shadow-md font-semibold dark:bg-gray-700 dark:text-orange-400'
+                    : 'text-orange-100 hover:bg-orange-500 hover:text-white dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white'
                 }`}
                 title={!sidebarOpen ? item.label : ''}
               >
@@ -136,11 +144,19 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPage, onLogo
           })}
         </nav>
 
-        {/* Logout Button */}
-        <div className="px-3 py-4 border-t border-purple-600">
+        {/* Theme Toggle + Logout */}
+        <div className="px-3 py-4 border-t border-orange-500/50 dark:border-gray-700 space-y-2">
+          <button
+            onClick={() => setIsDark(!isDark)}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-orange-100 hover:bg-orange-500 hover:text-white transition-all duration-200 dark:text-gray-300 dark:hover:bg-gray-700"
+            title={!sidebarOpen ? (isDark ? '亮色模式' : '暗黑模式') : ''}
+          >
+            {isDark ? <Sun size={20} className="flex-shrink-0" /> : <Moon size={20} className="flex-shrink-0" />}
+            {sidebarOpen && <span className="text-sm font-medium">{isDark ? '亮色模式' : '暗黑模式'}</span>}
+          </button>
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-purple-100 hover:bg-red-600 hover:text-white transition-all duration-200"
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-orange-100 hover:bg-red-600 hover:text-white transition-all duration-200 dark:text-gray-300"
             title={!sidebarOpen ? '登出' : ''}
           >
             <LogOut size={20} className="flex-shrink-0" />
@@ -150,15 +166,15 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPage, onLogo
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden bg-gray-100 dark:bg-gray-900 transition-colors">
         {/* Top Bar */}
-        <div className="bg-white border-b border-gray-200 shadow-sm px-6 py-4 flex items-center justify-between">
+        <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm px-6 py-4 flex items-center justify-between transition-colors">
           <div className="flex-1">
-            <h1 className="text-2xl font-bold text-gray-800">
+            <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
               {menuItems.find(item => isCurrentPage(item.path))?.label || '好餸 - 管理後台'}
             </h1>
           </div>
-          <div className="text-sm text-gray-600">
+          <div className="text-sm text-gray-600 dark:text-gray-400">
             {new Date().toLocaleDateString('zh-HK', {
               weekday: 'long',
               year: 'numeric',

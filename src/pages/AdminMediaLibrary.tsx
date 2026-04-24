@@ -171,8 +171,8 @@ const AdminMediaLibrary: React.FC = () => {
         )}
 
         {/* Upload Section */}
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
+          <h2 className="text-lg font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
             <Upload size={20} className="text-blue-600" />
             上傳圖片
           </h2>
@@ -187,9 +187,9 @@ const AdminMediaLibrary: React.FC = () => {
                 disabled={uploading}
                 className="hidden"
               />
-              <div className="flex items-center gap-3 px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition-colors">
-                <Image size={24} className="text-gray-400" />
-                <span className="text-sm text-gray-600">
+              <div className="flex items-center gap-3 px-4 py-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg hover:border-blue-400 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
+                <Image size={24} className="text-gray-400 dark:text-gray-500" />
+                <span className="text-sm text-gray-600 dark:text-gray-300">
                   {uploading ? '正在上傳...' : '點擊選擇圖片檔案'}
                 </span>
               </div>
@@ -198,14 +198,14 @@ const AdminMediaLibrary: React.FC = () => {
 
           {uploading && (
             <div className="mt-4">
-              <div className="flex items-center justify-between text-sm text-gray-600 mb-1">
+              <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-300 mb-1">
                 <span className="flex items-center gap-2">
                   <Loader2 size={16} className="animate-spin" />
                   上傳中...
                 </span>
                 <span>{uploadProgress}%</span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2.5">
+              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
                 <div
                   className="bg-blue-600 h-2.5 rounded-full transition-all duration-200"
                   style={{ width: `${uploadProgress}%` }}
@@ -217,13 +217,13 @@ const AdminMediaLibrary: React.FC = () => {
 
         {/* Media Grid */}
         {loading ? (
-          <div className="bg-white rounded-lg shadow p-8 text-center text-gray-500">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-8 text-center text-gray-500 dark:text-gray-400">
             <Loader2 size={24} className="animate-spin mx-auto mb-2" />
             加載中...
           </div>
         ) : mediaList.length === 0 ? (
-          <div className="bg-white rounded-lg shadow p-8 text-center text-gray-500">
-            <Image size={48} className="mx-auto mb-3 text-gray-300" />
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-8 text-center text-gray-500 dark:text-gray-400">
+            <Image size={48} className="mx-auto mb-3 text-gray-300 dark:text-gray-600" />
             <p>尚未上傳任何圖片</p>
           </div>
         ) : (
@@ -231,10 +231,10 @@ const AdminMediaLibrary: React.FC = () => {
             {mediaList.map(item => (
               <div
                 key={item.key}
-                className="bg-white rounded-lg shadow overflow-hidden hover:shadow-md transition-shadow"
+                className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden hover:shadow-md transition-shadow"
               >
                 {/* Thumbnail */}
-                <div className="aspect-square bg-gray-50 flex items-center justify-center overflow-hidden">
+                <div className="aspect-square bg-gray-50 dark:bg-gray-900 flex items-center justify-center overflow-hidden">
                   <img
                     src={item.url}
                     alt={item.name}
@@ -246,7 +246,7 @@ const AdminMediaLibrary: React.FC = () => {
                       const parent = (e.target as HTMLImageElement).parentElement;
                       if (parent) {
                         const fallback = document.createElement('div');
-                        fallback.className = 'flex flex-col items-center justify-center text-gray-400';
+                        fallback.className = 'flex flex-col items-center justify-center text-gray-400 dark:text-gray-500';
                         fallback.innerHTML = `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span class="text-xs mt-1">無法顯示</span>`;
                         parent.appendChild(fallback);
                       }
@@ -256,10 +256,10 @@ const AdminMediaLibrary: React.FC = () => {
 
                 {/* Info */}
                 <div className="p-3">
-                  <p className="text-sm font-medium text-gray-800 truncate" title={item.name}>
+                  <p className="text-sm font-medium text-gray-800 dark:text-white truncate" title={item.name}>
                     {item.name}
                   </p>
-                  <p className="text-xs text-gray-500 mt-0.5">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                     {formatSize(item.size)} · {new Date(item.uploaded).toLocaleDateString('zh-HK')}
                   </p>
 
@@ -267,7 +267,7 @@ const AdminMediaLibrary: React.FC = () => {
                   <div className="flex gap-2 mt-3">
                     <button
                       onClick={() => handleCopyUrl(item)}
-                      className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 rounded hover:bg-blue-100 transition-colors"
+                      className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-xs font-medium text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 rounded hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
                     >
                       {copiedKey === item.key ? (
                         <>
@@ -283,7 +283,7 @@ const AdminMediaLibrary: React.FC = () => {
                     </button>
                     <button
                       onClick={() => handleDelete(item)}
-                      className="flex items-center justify-center gap-1 px-2 py-1.5 text-xs font-medium text-red-700 bg-red-50 rounded hover:bg-red-100 transition-colors"
+                      className="flex items-center justify-center gap-1 px-2 py-1.5 text-xs font-medium text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
                     >
                       <Trash2 size={14} />
                       刪除

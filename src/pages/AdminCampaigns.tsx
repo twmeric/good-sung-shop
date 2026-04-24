@@ -263,14 +263,14 @@ const AdminCampaigns: React.FC = () => {
         )}
 
         {/* Tabs */}
-        <div className="bg-white border-b mb-6 rounded-t-lg">
+        <div className="bg-white dark:bg-gray-800 border-b dark:border-gray-700 mb-6 rounded-t-lg">
           <nav className="flex space-x-8 px-6" aria-label="分頁">
             <button
               onClick={() => { setActiveTab('campaigns'); setSelectedScenario(null); }}
               className={`py-4 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'campaigns'
                   ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-500'
               }`}
             >
               活動管理
@@ -281,7 +281,7 @@ const AdminCampaigns: React.FC = () => {
                 className={`py-4 px-1 border-b-2 font-medium text-sm ${
                   activeTab === 'templates'
                     ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-500'
                 }`}
               >
                 訊息模板: {selectedScenario}
@@ -306,20 +306,20 @@ const AdminCampaigns: React.FC = () => {
 
             {/* Campaigns List */}
             {loading ? (
-              <div className="bg-white rounded shadow p-8 text-center text-gray-500">加載中...</div>
+              <div className="bg-white dark:bg-gray-800 rounded shadow p-8 text-center text-gray-500 dark:text-gray-400">加載中...</div>
             ) : campaigns.length === 0 ? (
-              <div className="bg-white rounded shadow p-8 text-center text-gray-500">暫無活動</div>
+              <div className="bg-white dark:bg-gray-800 rounded shadow p-8 text-center text-gray-500 dark:text-gray-400">暫無活動</div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {campaigns.map(campaign => (
-                  <div key={campaign.id} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+                  <div key={campaign.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
                     <div className="mb-4">
-                      <h3 className="text-lg font-bold text-gray-900">{campaign.name}</h3>
-                      <p className="text-sm text-gray-600 font-mono">{campaign.scenarioKey}</p>
-                      <p className="text-xs text-gray-500 mt-2">
+                      <h3 className="text-lg font-bold text-gray-900 dark:text-white">{campaign.name}</h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-300 font-mono">{campaign.scenarioKey}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
                         狀態：{campaign.isActive ? '啟用' : '停用'}
                       </p>
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                         推廣連結：{' '}
                         <a
                           href={`https://goodstore.jkdcoding.com/?scenarioKey=${campaign.scenarioKey}`}
@@ -337,7 +337,7 @@ const AdminCampaigns: React.FC = () => {
                           setSelectedScenario(campaign.scenarioKey);
                           setActiveTab('templates');
                         }}
-                        className="flex-1 flex items-center justify-center px-3 py-2 bg-purple-500 text-white rounded hover:bg-purple-600 text-sm"
+                        className="flex-1 flex items-center justify-center px-3 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 text-sm"
                       >
                         <Eye className="w-4 h-4 mr-1" /> 訊息模板
                       </button>
@@ -349,7 +349,7 @@ const AdminCampaigns: React.FC = () => {
                       </button>
                       <button
                         onClick={() => navigate(`/admin/campaigns/${campaign.scenarioKey}/settings`)}
-                        className="flex-1 flex items-center justify-center px-3 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-600 text-sm"
+                        className="flex-1 flex items-center justify-center px-3 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 text-sm"
                       >
                         ⚙️ 設置
                       </button>
@@ -385,7 +385,7 @@ const AdminCampaigns: React.FC = () => {
               <select
                 value={selectedFilter}
                 onChange={e => setSelectedFilter(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg"
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-white"
               >
                 <option value="all">所有模板</option>
                 {Array.from(new Set(templates.map(t => t.messageKey))).map(key => (
@@ -397,13 +397,13 @@ const AdminCampaigns: React.FC = () => {
             {/* Templates Grid */}
             <div className="space-y-4">
               {filteredTemplates.length === 0 ? (
-                <div className="bg-white rounded shadow p-8 text-center text-gray-500">暫無模板</div>
+                <div className="bg-white dark:bg-gray-800 rounded shadow p-8 text-center text-gray-500 dark:text-gray-400">暫無模板</div>
               ) : (
                 filteredTemplates.map(template => (
-                  <div key={template.id} className="bg-white rounded-lg shadow p-6 border-l-4 border-purple-500">
+                  <div key={template.id} className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 border-l-4 border-orange-500">
                     <div className="mb-4">
-                      <h4 className="text-lg font-bold text-gray-900">{template.messageKey}</h4>
-                      <p className="text-sm text-gray-600 mt-2 line-clamp-2">{template.messageContent}</p>
+                      <h4 className="text-lg font-bold text-gray-900 dark:text-white">{template.messageKey}</h4>
+                      <p className="text-sm text-gray-600 dark:text-gray-300 mt-2 line-clamp-2">{template.messageContent}</p>
                     </div>
                     <div className="flex gap-2">
                       <button
@@ -439,28 +439,28 @@ const AdminCampaigns: React.FC = () => {
         {/* Campaign Form Modal */}
         {showForm && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full">
               <h2 className="text-2xl font-bold mb-4">{editingId ? '編輯活動' : '新增活動'}</h2>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">活動識別碼</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">活動識別碼</label>
                   <input
                     type="text"
                     disabled={!!editingId}
                     placeholder="活動識別碼"
                     value={formData.scenarioKey}
                     onChange={e => setFormData({ ...formData, scenarioKey: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:bg-gray-800 dark:text-white"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">活動名稱</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">活動名稱</label>
                   <input
                     type="text"
                     placeholder="活動顯示名稱"
                     value={formData.name}
                     onChange={e => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:bg-gray-800 dark:text-white"
                   />
                 </div>
 
@@ -468,7 +468,7 @@ const AdminCampaigns: React.FC = () => {
               <div className="flex gap-2 mt-6">
                 <button
                   onClick={() => setShowForm(false)}
-                  className="flex-1 px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300"
+                  className="flex-1 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600"
                 >
                   取消
                 </button>
@@ -486,34 +486,34 @@ const AdminCampaigns: React.FC = () => {
         {/* Template Form Modal */}
         {showTemplateForm && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full">
               <h2 className="text-2xl font-bold mb-4">{editingTemplateId ? '編輯模板' : '新增模板'}</h2>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">模板識別碼</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">模板識別碼</label>
                   <input
                     type="text"
                     placeholder="模板識別碼"
                     value={templateFormData.messageKey}
                     onChange={e => setTemplateFormData({ ...templateFormData, messageKey: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:bg-gray-800 dark:text-white"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">模板內容</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">模板內容</label>
                   <textarea
                     placeholder="輸入模板內容..."
                     rows={6}
                     value={templateFormData.messageContent}
                     onChange={e => setTemplateFormData({ ...templateFormData, messageContent: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:bg-gray-800 dark:text-white"
                   />
                 </div>
               </div>
               <div className="flex gap-2 mt-6">
                 <button
                   onClick={() => setShowTemplateForm(false)}
-                  className="flex-1 px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300"
+                  className="flex-1 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600"
                 >
                   取消
                 </button>
@@ -531,22 +531,22 @@ const AdminCampaigns: React.FC = () => {
         {/* Preview Modal */}
         {previewData && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg p-6 max-w-md w-full relative">
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full relative">
               <h2 className="text-2xl font-bold mb-4">模板預覽</h2>
               <button
                 onClick={() => setPreviewData(null)}
-                className="absolute top-4 right-4 text-gray-600 hover:text-gray-900"
+                className="absolute top-4 right-4 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
               >
                 <X className="w-5 h-5" />
               </button>
 
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-sm text-gray-800 whitespace-pre-wrap break-words max-h-64 overflow-y-auto">
+              <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4 text-sm text-gray-800 dark:text-white whitespace-pre-wrap break-words max-h-64 overflow-y-auto">
                 {previewData.preview}
               </div>
 
               <button
                 onClick={() => setPreviewData(null)}
-                className="w-full mt-4 px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300"
+                className="w-full mt-4 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600"
               >
                 關閉
               </button>

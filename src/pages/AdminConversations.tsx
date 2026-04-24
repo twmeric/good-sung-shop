@@ -130,7 +130,7 @@ const AdminConversations: React.FC = () => {
         <input
           type="text"
           placeholder="搜尋客戶電話號碼..."
-          className="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-purple-500 outline-none"
+          className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-2 focus:ring-orange-500 outline-none dark:bg-gray-800 dark:text-white"
           value={searchTerm}
           onChange={e => setSearchTerm(e.target.value)}
         />
@@ -138,11 +138,11 @@ const AdminConversations: React.FC = () => {
 
       {/* Conversations List */}
       {loading ? (
-        <div className="bg-white rounded shadow p-8 text-center text-gray-500">
+        <div className="bg-white dark:bg-gray-800 rounded shadow p-8 text-center text-gray-500 dark:text-gray-400">
           加載中...
         </div>
       ) : filteredConversations.length === 0 ? (
-        <div className="bg-white rounded shadow p-8 text-center text-gray-500">
+        <div className="bg-white dark:bg-gray-800 rounded shadow p-8 text-center text-gray-500 dark:text-gray-400">
           {conversations.length === 0 ? '沒有對話記錄' : '沒有符合條件的對話'}
         </div>
       ) : (
@@ -151,19 +151,19 @@ const AdminConversations: React.FC = () => {
             <div
               key={conv.phone}
               onClick={() => openConversation(conv.phone)}
-              className="bg-white rounded shadow p-4 cursor-pointer hover:shadow-lg hover:bg-purple-50 transition-all border-l-4 border-purple-500"
+              className="bg-white dark:bg-gray-800 rounded shadow p-4 cursor-pointer hover:shadow-lg hover:bg-orange-50 dark:hover:bg-orange-900/30 transition-all border-l-4 border-orange-500"
             >
               <div className="flex justify-between items-start">
                 <div className="flex-1">
                   <div className="font-semibold text-lg">📱 {conv.phone}</div>
-                  <div className="text-sm text-gray-600 mt-1">
+                  <div className="text-sm text-gray-600 dark:text-gray-300 mt-1">
                     最後消息：{conv.lastMessageAt ? new Date(conv.lastMessageAt * 1000).toLocaleString('zh-HK') : 'N/A'}
                   </div>
-                  <div className="text-xs text-gray-500 mt-1">
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                     消息數量：{conv.messageCount || 0} 條
                   </div>
                 </div>
-                <div className="text-purple-600 font-semibold whitespace-nowrap ml-4">查看對話 →</div>
+                <div className="text-orange-600 font-semibold whitespace-nowrap ml-4">查看對話 →</div>
               </div>
             </div>
           ))}
@@ -173,14 +173,14 @@ const AdminConversations: React.FC = () => {
       {/* Conversation Modal */}
       {showModal && selectedPhone && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] flex flex-col">
+          <div className="bg-white dark:bg-gray-800 rounded-lg max-w-2xl w-full max-h-[90vh] flex flex-col">
             {/* Header */}
-            <div className="sticky top-0 bg-gradient-to-r from-purple-500 to-purple-600 p-4 flex justify-between items-center border-b text-white rounded-t-lg">
+            <div className="sticky top-0 bg-gradient-to-r from-orange-500 to-orange-600 p-4 flex justify-between items-center border-b text-white rounded-t-lg">
               <div className="flex items-center gap-2">
                 <MessageCircle className="w-5 h-5" />
                 <div>
                   <h2 className="text-xl font-bold">對話詳情</h2>
-                  <p className="text-sm text-purple-100">📱 {selectedPhone}</p>
+                  <p className="text-sm text-orange-100">📱 {selectedPhone}</p>
                 </div>
               </div>
               <button
@@ -192,9 +192,9 @@ const AdminConversations: React.FC = () => {
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50">
+            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50 dark:bg-gray-900">
               {messages.length === 0 ? (
-                <p className="text-gray-500 text-center py-8">沒有消息</p>
+                <p className="text-gray-500 dark:text-gray-400 text-center py-8">沒有消息</p>
               ) : (
                 [...messages].reverse().map((msg) => (
                   <div
@@ -204,14 +204,14 @@ const AdminConversations: React.FC = () => {
                     <div
                       className={`max-w-[80%] p-3 rounded-2xl ${
                         msg.sender === 'bot'
-                          ? 'bg-purple-600 text-white rounded-br-none'
-                          : 'bg-white border border-gray-200 text-gray-800 rounded-bl-none'
+                          ? 'bg-orange-600 text-white rounded-br-none'
+                          : 'bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-800 dark:text-white rounded-bl-none'
                       }`}
                     >
                       <div className="text-sm mb-1 break-words">{msg.message}</div>
                       <div
                         className={`text-xs ${
-                          msg.sender === 'bot' ? 'text-purple-200' : 'text-gray-400'
+                          msg.sender === 'bot' ? 'text-orange-200' : 'text-gray-400 dark:text-gray-500'
                         }`}
                       >
                         {msg.createdAt ? new Date(msg.createdAt * 1000).toLocaleString('zh-HK') : 'N/A'}
@@ -224,7 +224,7 @@ const AdminConversations: React.FC = () => {
             </div>
 
             {/* Reply Input */}
-            <div className="p-4 border-t bg-white rounded-b-lg">
+            <div className="p-4 border-t dark:border-gray-700 bg-white dark:bg-gray-800 rounded-b-lg">
               <div className="flex gap-2">
                 <textarea
                   value={replyText}
@@ -232,13 +232,13 @@ const AdminConversations: React.FC = () => {
                   onKeyDown={handleKeyDown}
                   placeholder="輸入回覆訊息... (按 Enter 發送)"
                   rows={2}
-                  className="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none resize-none"
+                  className="flex-1 p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none resize-none dark:bg-gray-800 dark:text-white"
                   disabled={sendLoading}
                 />
                 <button
                   onClick={handleSendMessage}
                   disabled={sendLoading || !replyText.trim()}
-                  className="bg-purple-600 hover:bg-purple-700 disabled:bg-purple-300 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2"
+                  className="bg-orange-600 hover:bg-orange-700 disabled:bg-orange-300 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2"
                 >
                   <Send className="w-4 h-4" />
                   {sendLoading ? '發送中...' : '發送'}

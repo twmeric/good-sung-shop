@@ -166,7 +166,7 @@ const AdminProducts: React.FC = () => {
         )}
 
         {/* Tabs */}
-        <div className="bg-white border-b mb-6 rounded-t-lg">
+        <div className="bg-white dark:bg-gray-800 border-b dark:border-gray-700 mb-6 rounded-t-lg">
           <nav className="flex space-x-1 px-2" aria-label="Tabs">
             {tabs.map(tab => (
               <button
@@ -175,7 +175,7 @@ const AdminProducts: React.FC = () => {
                 className={`py-3 px-4 border-b-2 font-medium text-sm transition-colors ${
                   activeTab === tab.key
                     ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
                 }`}
               >
                 {tab.label}
@@ -199,15 +199,15 @@ const AdminProducts: React.FC = () => {
 
         {/* Add Form */}
         {showAddForm && (
-          <div className="bg-white rounded-lg shadow p-6 mb-6 border-l-4 border-blue-500">
-            <h3 className="text-lg font-bold mb-4">新增產品</h3>
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6 border-l-4 border-blue-500">
+            <h3 className="text-lg font-bold mb-4 dark:text-white">新增產品</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">類別</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">類別</label>
                 <select
                   value={newProduct.category}
                   onChange={e => setNewProduct({ ...newProduct, category: e.target.value as any })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:text-white"
                 >
                   <option value="dish">餸菜</option>
                   <option value="soup">湯品</option>
@@ -215,112 +215,112 @@ const AdminProducts: React.FC = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">名稱</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">名稱</label>
                 <input
                   value={newProduct.name}
                   onChange={e => setNewProduct({ ...newProduct, name: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:text-white"
                   placeholder="產品名稱"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">價格</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">價格</label>
                 <input
                   type="number"
                   value={newProduct.price || ''}
                   onChange={e => setNewProduct({ ...newProduct, price: e.target.value ? parseInt(e.target.value) : null })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:text-white"
                   placeholder="HK$"
                 />
               </div>
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">描述</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">描述</label>
                 <input
                   value={newProduct.description || ''}
                   onChange={e => setNewProduct({ ...newProduct, description: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:text-white"
                   placeholder="產品描述"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">排序</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">排序</label>
                 <input
                   type="number"
                   value={newProduct.sort_order || 0}
                   onChange={e => setNewProduct({ ...newProduct, sort_order: parseInt(e.target.value) || 0 })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:text-white"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">庫存</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">庫存</label>
                 <input
                   type="number"
                   value={newProduct.stock_quantity ?? ''}
                   onChange={e => setNewProduct({ ...newProduct, stock_quantity: e.target.value ? parseInt(e.target.value) : 0 })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:text-white"
                   placeholder="數量"
                 />
               </div>
               <div className="md:col-span-3">
-                <label className="block text-sm font-medium text-gray-700 mb-1">圖片 URL</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">圖片 URL</label>
                 <input
                   value={newProduct.image_url || ''}
                   onChange={e => setNewProduct({ ...newProduct, image_url: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:text-white"
                   placeholder="https://...（可從媒體庫複製）"
                 />
               </div>
             </div>
             <div className="mt-4 flex gap-2">
               <button onClick={handleAdd} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">創建</button>
-              <button onClick={() => setShowAddForm(false)} className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">取消</button>
+              <button onClick={() => setShowAddForm(false)} className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600">取消</button>
             </div>
           </div>
         )}
 
         {/* Products Table */}
         {loading ? (
-          <div className="bg-white rounded shadow p-8 text-center text-gray-500">加載中...</div>
+          <div className="bg-white dark:bg-gray-800 rounded shadow p-8 text-center text-gray-500 dark:text-gray-400">加載中...</div>
         ) : (
-          <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
             <table className="min-w-full">
-              <thead className="bg-gray-50">
+              <thead className="bg-gray-50 dark:bg-gray-900">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">類別</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">編號</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">名稱</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">描述</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">價格</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">庫存</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">圖片</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">狀態</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">操作</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">類別</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">編號</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">名稱</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">描述</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">價格</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">庫存</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">圖片</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">狀態</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">操作</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                 {filteredProducts.map(product => {
                   const cat = categoryLabels[product.category] || categoryLabels.dish;
                   const CatIcon = cat.icon;
                   const isEditing = editingId === product.id;
 
                   return (
-                    <tr key={product.id} className="hover:bg-gray-50">
+                    <tr key={product.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                       <td className="px-4 py-3">
                         <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium ${cat.color}`}>
                           <CatIcon size={14} />
                           {cat.label}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-500">
+                      <td className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
                         {isEditing ? (
                           <input
                             value={editForm.product_code || ''}
                             onChange={e => setEditForm({ ...editForm, product_code: e.target.value })}
-                            className="w-20 px-2 py-1 border border-gray-300 rounded text-sm"
+                            className="w-20 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-sm bg-white dark:bg-gray-800 dark:text-white"
                             placeholder="編號"
                           />
                         ) : (
-                          <code className="bg-gray-100 px-2 py-0.5 rounded text-xs">{product.product_code || '-'}</code>
+                          <code className="bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded text-xs">{product.product_code || '-'}</code>
                         )}
                       </td>
                       <td className="px-4 py-3">
@@ -328,18 +328,18 @@ const AdminProducts: React.FC = () => {
                           <input
                             value={editForm.name || ''}
                             onChange={e => setEditForm({ ...editForm, name: e.target.value })}
-                            className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                            className="w-full px-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-sm bg-white dark:bg-gray-800 dark:text-white"
                           />
                         ) : (
-                          <span className="font-medium text-gray-900">{product.name}</span>
+                          <span className="font-medium text-gray-900 dark:text-white">{product.name}</span>
                         )}
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-600">
+                      <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
                         {isEditing ? (
                           <input
                             value={editForm.description || ''}
                             onChange={e => setEditForm({ ...editForm, description: e.target.value })}
-                            className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                            className="w-full px-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-sm bg-white dark:bg-gray-800 dark:text-white"
                           />
                         ) : (
                           product.description || '-'
@@ -351,7 +351,7 @@ const AdminProducts: React.FC = () => {
                             type="number"
                             value={editForm.price || ''}
                             onChange={e => setEditForm({ ...editForm, price: e.target.value ? parseInt(e.target.value) : null })}
-                            className="w-24 px-2 py-1 border border-gray-300 rounded text-sm"
+                            className="w-24 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-sm bg-white dark:bg-gray-800 dark:text-white"
                           />
                         ) : (
                           product.price ? `HK$${product.price}` : '-'
@@ -363,7 +363,7 @@ const AdminProducts: React.FC = () => {
                             type="number"
                             value={editForm.stock_quantity ?? 0}
                             onChange={e => setEditForm({ ...editForm, stock_quantity: parseInt(e.target.value) || 0 })}
-                            className="w-20 px-2 py-1 border border-gray-300 rounded text-sm"
+                            className="w-20 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-sm bg-white dark:bg-gray-800 dark:text-white"
                           />
                         ) : (
                           <span className={`font-medium ${
@@ -381,14 +381,14 @@ const AdminProducts: React.FC = () => {
                           <input
                             value={editForm.image_url || ''}
                             onChange={e => setEditForm({ ...editForm, image_url: e.target.value })}
-                            className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                            className="w-full px-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-sm bg-white dark:bg-gray-800 dark:text-white"
                             placeholder="圖片URL"
                           />
                         ) : (
                           product.image_url ? (
                             <img src={product.image_url} alt={product.name} className="w-10 h-10 object-cover rounded" />
                           ) : (
-                            <span className="text-gray-400 text-xs">-</span>
+                            <span className="text-gray-400 dark:text-gray-500 text-xs">-</span>
                           )
                         )}
                       </td>
@@ -419,7 +419,7 @@ const AdminProducts: React.FC = () => {
               </tbody>
             </table>
             {filteredProducts.length === 0 && (
-              <div className="p-8 text-center text-gray-500">沒有產品</div>
+              <div className="p-8 text-center text-gray-500 dark:text-gray-400">沒有產品</div>
             )}
           </div>
         )}

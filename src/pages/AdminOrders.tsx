@@ -217,40 +217,40 @@ const AdminOrders: React.FC = () => {
   return (
     <AdminLayout currentPage="orders" onLogout={handleLogout}>
       {/* Filters */}
-      <div className="mb-6 bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+      <div className="mb-6 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
         <div className="grid grid-cols-1 md:grid-cols-6 gap-4 items-end">
           <div className="md:col-span-1">
-            <label className="block text-xs font-medium text-gray-500 mb-1">搜尋</label>
+            <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">搜尋</label>
             <input
               type="text"
               placeholder="訂單號、姓名、電話..."
-              className="w-full p-2.5 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-purple-500 outline-none text-sm"
+              className="w-full p-2.5 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-2 focus:ring-orange-500 outline-none text-sm bg-white dark:bg-gray-800 dark:text-white"
               value={filters.searchTerm}
               onChange={e => handleFilterChange('searchTerm', e.target.value)}
             />
           </div>
           <div className="md:col-span-2">
-            <label className="block text-xs font-medium text-gray-500 mb-1">配送日期範圍</label>
+            <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">配送日期範圍</label>
             <div className="flex gap-2">
               <input
                 type="date"
-                className="w-full p-2.5 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-purple-500 outline-none text-sm"
+                className="w-full p-2.5 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-2 focus:ring-orange-500 outline-none text-sm bg-white dark:bg-gray-800 dark:text-white"
                 value={filters.deliveryDateStart}
                 onChange={e => handleFilterChange('deliveryDateStart', e.target.value)}
               />
               <span className="flex items-center text-gray-400 px-1">~</span>
               <input
                 type="date"
-                className="w-full p-2.5 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-purple-500 outline-none text-sm"
+                className="w-full p-2.5 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-2 focus:ring-orange-500 outline-none text-sm bg-white dark:bg-gray-800 dark:text-white"
                 value={filters.deliveryDateEnd}
                 onChange={e => handleFilterChange('deliveryDateEnd', e.target.value)}
               />
             </div>
           </div>
           <div className="md:col-span-1">
-            <label className="block text-xs font-medium text-gray-500 mb-1">付款狀態</label>
+            <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">付款狀態</label>
             <select
-              className="w-full p-2.5 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-purple-500 outline-none text-sm bg-white"
+              className="w-full p-2.5 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-2 focus:ring-orange-500 outline-none text-sm bg-white dark:bg-gray-800 dark:text-white"
               value={filters.paymentStatus}
               onChange={e => handleFilterChange('paymentStatus', e.target.value)}
             >
@@ -261,9 +261,9 @@ const AdminOrders: React.FC = () => {
             </select>
           </div>
           <div className="md:col-span-2 flex items-center justify-end gap-3">
-            <div className="text-sm text-gray-500">
-              共 <span className="font-bold text-gray-800">{filteredOrders.length}</span> 筆
-              {hasActiveFilters && <span className="text-purple-600 text-xs ml-1">（已篩選）</span>}
+            <div className="text-sm text-gray-500 dark:text-gray-400">
+              共 <span className="font-bold text-gray-800 dark:text-white">{filteredOrders.length}</span> 筆
+              {hasActiveFilters && <span className="text-orange-600 text-xs ml-1">（已篩選）</span>}
             </div>
             <button
               onClick={exportToCSV}
@@ -276,7 +276,7 @@ const AdminOrders: React.FC = () => {
             {hasActiveFilters && (
               <button
                 onClick={clearFilters}
-                className="text-xs text-purple-600 hover:text-purple-800 font-medium px-2 py-1 border border-purple-200 rounded hover:bg-purple-50"
+                className="text-xs text-orange-600 hover:text-orange-800 font-medium px-2 py-1 border border-orange-200 rounded hover:bg-orange-50"
               >
                 清除
               </button>
@@ -286,10 +286,10 @@ const AdminOrders: React.FC = () => {
       </div>
 
       {/* Orders Table */}
-      <div className="overflow-x-auto bg-white rounded-lg shadow border border-gray-200">
+      <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700">
         <table className="min-w-full">
           <thead>
-            <tr className="bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+            <tr className="bg-gray-100 dark:bg-gray-900 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
               <th className="p-4">ID</th>
               <th className="p-4">訂單號</th>
               <th className="p-4">下單日期</th>
@@ -303,18 +303,18 @@ const AdminOrders: React.FC = () => {
               <th className="p-4">操作</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200">
+          <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
             {filteredOrders.map(order => {
               const status = getOrderStatus(order);
               return (
-                <tr key={order.id} className="hover:bg-purple-50 transition-colors">
-                  <td className="p-4 text-sm text-gray-600">{order.id}</td>
-                  <td className="p-4 font-mono font-bold text-purple-600 text-sm">{String(order.createdAt).slice(-4)}</td>
-                  <td className="p-4 text-sm text-gray-600 whitespace-nowrap">{new Date(order.createdAt * 1000).toLocaleDateString('zh-HK')}</td>
-                  <td className="p-4 text-sm font-medium text-gray-800">{order.name}</td>
-                  <td className="p-4 text-sm text-gray-600">{order.phone}</td>
-                  <td className="p-4 text-sm text-gray-600">{order.estate || '-'}</td>
-                  <td className="p-4 text-sm text-gray-600 max-w-xs">
+                <tr key={order.id} className="hover:bg-orange-50 dark:hover:bg-gray-700 transition-colors">
+                  <td className="p-4 text-sm text-gray-600 dark:text-gray-400">{order.id}</td>
+                  <td className="p-4 font-mono font-bold text-orange-600 text-sm">{String(order.createdAt).slice(-4)}</td>
+                  <td className="p-4 text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">{new Date(order.createdAt * 1000).toLocaleDateString('zh-HK')}</td>
+                  <td className="p-4 text-sm font-medium text-gray-800 dark:text-gray-300">{order.name}</td>
+                  <td className="p-4 text-sm text-gray-600 dark:text-gray-400">{order.phone}</td>
+                  <td className="p-4 text-sm text-gray-600 dark:text-gray-400">{order.estate || '-'}</td>
+                  <td className="p-4 text-sm text-gray-600 dark:text-gray-400 max-w-xs">
                     {(() => {
                       try {
                         const items = JSON.parse(order.items || '[]');
@@ -324,8 +324,8 @@ const AdminOrders: React.FC = () => {
                       } catch { return '-'; }
                     })()}
                   </td>
-                  <td className="p-4 text-sm font-bold text-gray-800">HK${order.totalPrice}</td>
-                  <td className="p-4 text-sm text-gray-600 whitespace-nowrap">{order.deliveryDate}</td>
+                  <td className="p-4 text-sm font-bold text-gray-800 dark:text-white">HK${order.totalPrice}</td>
+                  <td className="p-4 text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">{order.deliveryDate}</td>
                   <td className="p-4">
                     <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${status.color}`}>
                       {status.label}
@@ -343,7 +343,7 @@ const AdminOrders: React.FC = () => {
             })}
             {filteredOrders.length === 0 && (
               <tr>
-                <td colSpan={11} className="p-8 text-center text-gray-500">
+                <td colSpan={11} className="p-8 text-center text-gray-500 dark:text-gray-400">
                   {orders.length === 0 ? '暫無訂單' : '沒有找到相符的訂單'}
                 </td>
               </tr>

@@ -47,21 +47,21 @@ const AdminLogin: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <form onSubmit={handleLogin} className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md">
-        <h2 className="text-3xl font-bold text-center text-gray-800 mb-2">管理員登入</h2>
-        <p className="text-center text-gray-500 mb-6">好餸社企後台管理系統</p>
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
+      <form onSubmit={handleLogin} className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg w-full max-w-md">
+        <h2 className="text-3xl font-bold text-center text-gray-800 dark:text-white mb-2">管理員登入</h2>
+        <p className="text-center text-gray-500 dark:text-gray-400 mb-6">好餸社企後台管理系統</p>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-4 text-lg">
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-xl mb-4 text-lg">
             {error}
           </div>
         )}
 
         <div className="mb-4">
-          <label className="block text-lg font-bold text-gray-700 mb-2">帳號</label>
+          <label className="block text-lg font-bold text-gray-700 dark:text-gray-300 mb-2">帳號</label>
           <input
-            className="w-full p-4 text-xl border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none"
+            className="w-full p-4 text-xl border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none dark:bg-gray-800 dark:text-white"
             type="text"
             placeholder="admin"
             value={username}
@@ -71,9 +71,9 @@ const AdminLogin: React.FC = () => {
         </div>
 
         <div className="mb-6">
-          <label className="block text-lg font-bold text-gray-700 mb-2">密碼</label>
+          <label className="block text-lg font-bold text-gray-700 dark:text-gray-300 mb-2">密碼</label>
           <input
-            className="w-full p-4 text-xl border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none"
+            className="w-full p-4 text-xl border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none dark:bg-gray-800 dark:text-white"
             type="password"
             placeholder="admin360"
             value={password}
@@ -89,7 +89,7 @@ const AdminLogin: React.FC = () => {
           {loading ? '登入中...' : '登入'}
         </button>
 
-        <div className="mt-4 text-center text-sm text-gray-400">
+        <div className="mt-4 text-center text-sm text-gray-400 dark:text-gray-500">
           <p>預設帳號：superadmin / superadmin360</p>
           <p>admin / admin360 | supplier / supplier360</p>
         </div>

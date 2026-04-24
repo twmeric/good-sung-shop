@@ -149,12 +149,12 @@ const AdminOrderDetail: React.FC = () => {
 
   if (loading) return (
     <AdminLayout currentPage="orders" onLogout={handleLogout}>
-      <div className="flex items-center justify-center h-64 text-gray-500">加載中...</div>
+      <div className="flex items-center justify-center h-64 text-gray-500 dark:text-gray-400">加載中...</div>
     </AdminLayout>
   );
   if (!order) return (
     <AdminLayout currentPage="orders" onLogout={handleLogout}>
-      <div className="text-center text-gray-500 py-12">訂單不存在</div>
+      <div className="text-center text-gray-500 dark:text-gray-400 py-12">訂單不存在</div>
     </AdminLayout>
   );
 
@@ -166,11 +166,11 @@ const AdminOrderDetail: React.FC = () => {
     <AdminLayout currentPage="orders" onLogout={handleLogout}>
       {/* Header */}
       <div className="mb-6">
-        <button onClick={() => navigate('/admin/orders')} className="text-purple-600 hover:text-purple-800 text-sm flex items-center gap-1 mb-2">
+        <button onClick={() => navigate('/admin/orders')} className="text-orange-600 hover:text-orange-800 text-sm flex items-center gap-1 mb-2">
           <ArrowLeft className="w-4 h-4" /> 返回訂單列表
         </button>
         <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-bold text-gray-800">訂單 #{String(order.createdAt).slice(-4)}</h1>
+          <h1 className="text-2xl font-bold text-gray-800 dark:text-white">訂單 #{String(order.createdAt).slice(-4)}</h1>
           {order.orderCompleted === 1 ? (
             <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">訂單完成</span>
           ) : order.paymentConfirmed === 1 ? (
@@ -179,22 +179,22 @@ const AdminOrderDetail: React.FC = () => {
             <span className="px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">待付款</span>
           )}
         </div>
-        <p className="text-sm text-gray-500 mt-1">下單時間：{new Date(order.createdAt * 1000).toLocaleString('zh-HK')}</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">下單時間：{new Date(order.createdAt * 1000).toLocaleString('zh-HK')}</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         {/* LEFT: Order Info (3/5) */}
         <div className="lg:col-span-3 space-y-6">
           {/* Payment Proof */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+            <h2 className="text-lg font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
               <DollarSign className="w-5 h-5 text-green-600" />
               付款記錄
             </h2>
             {order.paymentProof && (!order.uploads || order.uploads.length === 0) && (
               <div className="mb-4">
-                <p className="text-sm text-gray-500 mb-2">付款憑證：</p>
-                <a href={order.paymentProof} target="_blank" rel="noopener noreferrer" className="text-purple-600 hover:underline break-all text-sm">
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">付款憑證：</p>
+                <a href={order.paymentProof} target="_blank" rel="noopener noreferrer" className="text-orange-600 hover:underline break-all text-sm">
                   {order.paymentProof}
                 </a>
               </div>
@@ -202,22 +202,22 @@ const AdminOrderDetail: React.FC = () => {
             {order.uploads && order.uploads.length > 0 ? (
               <div className="grid grid-cols-4 gap-3 mb-4">
                 {order.uploads.map((u: any) => (
-                  <div key={u.id} className="border rounded-lg overflow-hidden">
+                  <div key={u.id} className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
                     {u.fileUrl?.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
                       <a href={u.fileUrl} target="_blank" rel="noopener noreferrer">
                         <img src={u.fileUrl} alt="Proof" className="w-full h-24 object-cover hover:opacity-90" />
                       </a>
                     ) : (
-                      <a href={u.fileUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center h-24 text-purple-600 text-xs bg-gray-50">
+                      <a href={u.fileUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center h-24 text-orange-600 text-xs bg-gray-50 dark:bg-gray-900">
                         查看文件
                       </a>
                     )}
                   </div>
                 ))}
               </div>
-            ) : !order.paymentProof && <p className="text-gray-400 text-sm italic mb-4">暫無付款憑證</p>}
+            ) : !order.paymentProof && <p className="text-gray-400 dark:text-gray-500 text-sm italic mb-4">暫無付款憑證</p>}
 
-            <div className="flex items-center gap-4 pt-4 border-t border-gray-100">
+            <div className="flex items-center gap-4 pt-4 border-t border-gray-100 dark:border-gray-700">
               <label className="flex items-center gap-3 cursor-pointer select-none">
                 <input
                   type="checkbox"
@@ -237,7 +237,7 @@ const AdminOrderDetail: React.FC = () => {
                     setConfirming(false);
                   }}
                 />
-                <span className={`font-bold ${order.paymentConfirmed ? 'text-green-600' : 'text-gray-600'}`}>
+                <span className={`font-bold ${order.paymentConfirmed ? 'text-green-600' : 'text-gray-600 dark:text-gray-400'}`}>
                   {order.paymentConfirmed ? '已確認付款' : '未確認付款'}
                 </span>
               </label>
@@ -254,46 +254,46 @@ const AdminOrderDetail: React.FC = () => {
           </div>
 
           {/* Order Info (Read Only) */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-bold text-gray-800 mb-4">訂單資料（只讀）</h2>
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+            <h2 className="text-lg font-bold text-gray-800 dark:text-white mb-4">訂單資料（只讀）</h2>
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1 flex items-center gap-1"><User className="w-3 h-3" /> 姓名</label>
-                <div className="w-full p-2.5 bg-gray-100 border border-gray-200 rounded-lg text-sm text-gray-700">{order.name}</div>
+                <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 flex items-center gap-1"><User className="w-3 h-3" /> 姓名</label>
+                <div className="w-full p-2.5 bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-700 dark:text-gray-300">{order.name}</div>
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1 flex items-center gap-1"><Phone className="w-3 h-3" /> 電話</label>
-                <div className="w-full p-2.5 bg-gray-100 border border-gray-200 rounded-lg text-sm text-gray-700">{order.phone}</div>
+                <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 flex items-center gap-1"><Phone className="w-3 h-3" /> 電話</label>
+                <div className="w-full p-2.5 bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-700 dark:text-gray-300">{order.phone}</div>
               </div>
               <div className="col-span-2">
-                <label className="block text-xs font-medium text-gray-500 mb-1 flex items-center gap-1"><MapPin className="w-3 h-3" /> 地址</label>
-                <div className="w-full p-2.5 bg-gray-100 border border-gray-200 rounded-lg text-sm text-gray-700">{order.region} {order.address}</div>
+                <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 flex items-center gap-1"><MapPin className="w-3 h-3" /> 地址</label>
+                <div className="w-full p-2.5 bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-700 dark:text-gray-300">{order.region} {order.address}</div>
               </div>
               <div className="col-span-2">
-                <label className="block text-xs font-medium text-gray-500 mb-1 flex items-center gap-1"><MapPin className="w-3 h-3" /> 屋苑</label>
-                <div className="w-full p-2.5 bg-gray-100 border border-gray-200 rounded-lg text-sm text-gray-700">{order.estate || '-'}</div>
+                <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 flex items-center gap-1"><MapPin className="w-3 h-3" /> 屋苑</label>
+                <div className="w-full p-2.5 bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-700 dark:text-gray-300">{order.estate || '-'}</div>
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1 flex items-center gap-1"><Calendar className="w-3 h-3" /> 配送日期</label>
-                <div className="w-full p-2.5 bg-gray-100 border border-gray-200 rounded-lg text-sm text-gray-700">{order.deliveryDate}</div>
+                <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 flex items-center gap-1"><Calendar className="w-3 h-3" /> 配送日期</label>
+                <div className="w-full p-2.5 bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-700 dark:text-gray-300">{order.deliveryDate}</div>
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1 flex items-center gap-1"><Clock className="w-3 h-3" /> 配送時間</label>
-                <div className="w-full p-2.5 bg-gray-100 border border-gray-200 rounded-lg text-sm text-gray-700">{order.deliveryTime || '—'}</div>
+                <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 flex items-center gap-1"><Clock className="w-3 h-3" /> 配送時間</label>
+                <div className="w-full p-2.5 bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-700 dark:text-gray-300">{order.deliveryTime || '—'}</div>
               </div>
             </div>
 
             {/* Items */}
             <div className="mb-4">
-              <label className="block text-xs font-medium text-gray-500 mb-1">套餐內容</label>
-              <div className="bg-gray-50 p-3 rounded-lg border border-gray-200 space-y-2">
+              <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">套餐內容</label>
+              <div className="bg-gray-50 dark:bg-gray-900 p-3 rounded-lg border border-gray-200 dark:border-gray-700 space-y-2">
                 {orderItems.map((item: any, idx: number) => (
                   <div key={idx} className="flex justify-between text-sm">
                     <span>{item.packageType === '2-dish-1-soup' ? '2餸1湯' : '3餸1湯'} x {item.quantity}</span>
                     <span className="font-medium">HK${item.subtotal}</span>
                   </div>
                 ))}
-                <div className="border-t pt-2 flex justify-between font-bold text-sm">
+                <div className="border-t border-gray-200 dark:border-gray-700 pt-2 flex justify-between font-bold text-sm">
                   <span>總計</span>
                   <span>HK${order.totalPrice}</span>
                 </div>
@@ -301,11 +301,11 @@ const AdminOrderDetail: React.FC = () => {
             </div>
 
             {/* Admin Editable Section */}
-            <form onSubmit={handleUpdate} className="border-t border-gray-100 pt-4">
-              <h3 className="text-sm font-bold text-gray-700 mb-3">管理員編輯區</h3>
+            <form onSubmit={handleUpdate} className="border-t border-gray-100 dark:border-gray-700 pt-4">
+              <h3 className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">管理員編輯區</h3>
               <div className="mb-4">
-                <label className="block text-xs font-medium text-gray-500 mb-1">客戶備註</label>
-                <textarea className="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 outline-none resize-none" rows={2} value={order.remarks || ''} onChange={e => setOrder({...order, remarks: e.target.value})} />
+                <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">客戶備註</label>
+                <textarea className="w-full p-2.5 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 outline-none resize-none bg-white dark:bg-gray-800 dark:text-white" rows={2} value={order.remarks || ''} onChange={e => setOrder({...order, remarks: e.target.value})} />
               </div>
               <div className="mb-4">
                 <label className="block text-xs font-medium text-gray-500 mb-1 text-red-500">管理員備註</label>
@@ -324,8 +324,8 @@ const AdminOrderDetail: React.FC = () => {
                 </div>
               )}
               <div className="flex gap-2">
-                <button type="submit" className="bg-purple-600 text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors">儲存備註</button>
-                <button type="button" onClick={() => navigate('/admin/orders')} className="bg-gray-200 text-gray-700 px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-300 transition-colors">取消</button>
+                <button type="submit" className="bg-orange-600 text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-orange-700 transition-colors">儲存備註</button>
+                <button type="button" onClick={() => navigate('/admin/orders')} className="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">取消</button>
               </div>
             </form>
           </div>
@@ -333,38 +333,38 @@ const AdminOrderDetail: React.FC = () => {
 
         {/* RIGHT: WhatsApp Chat (2/5) */}
         <div className="lg:col-span-2">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 flex flex-col h-[calc(100vh-180px)] sticky top-6">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col h-[calc(100vh-180px)] sticky top-6">
             {/* Chat Header */}
-            <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-purple-500 to-purple-600 rounded-t-xl">
+            <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-orange-500 to-orange-600 rounded-t-xl">
               <div className="flex items-center gap-2 text-white">
                 <MessageCircle className="w-5 h-5" />
                 <div>
                   <h3 className="font-bold text-sm">客戶對話</h3>
-                  <p className="text-xs text-purple-100">{order.phone}</p>
+                  <p className="text-xs text-orange-100">{order.phone}</p>
                 </div>
               </div>
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50">
+            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50 dark:bg-gray-900">
               {chatLoading ? (
-                <p className="text-center text-gray-400 py-8 text-sm">加載對話中...</p>
+                <p className="text-center text-gray-400 dark:text-gray-500 py-8 text-sm">加載對話中...</p>
               ) : messages.length === 0 ? (
                 <div className="text-center py-8">
                   <MessageCircle className="w-10 h-10 text-gray-300 mx-auto mb-2" />
-                  <p className="text-gray-400 text-sm">暫無對話記錄</p>
-                  <p className="text-gray-400 text-xs mt-1">客戶發送消息後會自動顯示在此</p>
+                  <p className="text-gray-400 dark:text-gray-500 text-sm">暫無對話記錄</p>
+                  <p className="text-gray-400 dark:text-gray-500 text-xs mt-1">客戶發送消息後會自動顯示在此</p>
                 </div>
               ) : (
                 [...messages].reverse().map((msg) => (
                   <div key={msg.id} className={`flex ${msg.sender === 'bot' ? 'justify-end' : 'justify-start'}`}>
                     <div className={`max-w-[85%] p-3 rounded-2xl text-sm ${
                       msg.sender === 'bot'
-                        ? 'bg-purple-600 text-white rounded-br-none'
-                        : 'bg-white border border-gray-200 text-gray-800 rounded-bl-none'
+                        ? 'bg-orange-600 text-white rounded-br-none'
+                        : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-300 rounded-bl-none'
                     }`}>
                       <div className="break-words">{msg.message}</div>
-                      <div className={`text-xs mt-1 ${msg.sender === 'bot' ? 'text-purple-200' : 'text-gray-400'}`}>
+                      <div className={`text-xs mt-1 ${msg.sender === 'bot' ? 'text-orange-200' : 'text-gray-400'}`}>
                         {msg.createdAt ? new Date(msg.createdAt * 1000).toLocaleString('zh-HK', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''}
                       </div>
                     </div>
@@ -376,7 +376,7 @@ const AdminOrderDetail: React.FC = () => {
 
             {/* Send Log */}
             {messages.filter(m => m.sender === 'bot').length > 0 && (
-              <div className="px-4 py-2 border-t border-gray-100 bg-gray-50">
+              <div className="px-4 py-2 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
                 <p className="text-xs text-gray-400">
                   已發送 {messages.filter(m => m.sender === 'bot').length} 條消息 ·
                   最後發送：{
@@ -392,7 +392,7 @@ const AdminOrderDetail: React.FC = () => {
             )}
 
             {/* Reply Input */}
-            <div className="p-3 border-t border-gray-200 bg-white rounded-b-xl">
+            <div className="p-3 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-b-xl">
               <div className="flex gap-2">
                 <textarea
                   value={replyText}
@@ -400,13 +400,13 @@ const AdminOrderDetail: React.FC = () => {
                   onKeyDown={handleKeyDown}
                   placeholder="輸入消息通知客戶..."
                   rows={2}
-                  className="flex-1 p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none resize-none"
+                  className="flex-1 p-2.5 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none resize-none bg-white dark:bg-gray-800 dark:text-white"
                   disabled={sendLoading}
                 />
                 <button
                   onClick={handleSendMessage}
                   disabled={sendLoading || !replyText.trim()}
-                  className="bg-purple-600 hover:bg-purple-700 disabled:bg-purple-300 text-white px-3 py-2 rounded-lg transition-colors flex items-center gap-1"
+                  className="bg-orange-600 hover:bg-orange-700 disabled:bg-orange-300 text-white px-3 py-2 rounded-lg transition-colors flex items-center gap-1"
                 >
                   <Send className="w-4 h-4" />
                 </button>

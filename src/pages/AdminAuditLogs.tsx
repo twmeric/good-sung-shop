@@ -22,7 +22,7 @@ const actionLabels: Record<string, { label: string; color: string }> = {
   CREATE: { label: '創建', color: 'bg-green-100 text-green-800' },
   UPDATE: { label: '更新', color: 'bg-blue-100 text-blue-800' },
   DELETE: { label: '刪除', color: 'bg-red-100 text-red-800' },
-  LOGIN: { label: '登入', color: 'bg-purple-100 text-purple-800' },
+  LOGIN: { label: '登入', color: 'bg-orange-100 text-orange-800' },
   LOGOUT: { label: '登出', color: 'bg-gray-100 text-gray-800' },
 };
 
@@ -113,16 +113,16 @@ const AdminAuditLogs: React.FC = () => {
         )}
 
         {/* Filters */}
-        <div className="mb-6 bg-white rounded-lg shadow p-4">
+        <div className="mb-6 bg-white dark:bg-gray-800 rounded-lg shadow p-4">
           <div className="flex flex-wrap gap-4 items-center mb-3">
             <div className="flex items-center gap-2">
-              <Filter size={18} className="text-gray-500" />
-              <span className="text-sm font-medium text-gray-700">篩選：</span>
+              <Filter size={18} className="text-gray-500 dark:text-gray-400" />
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">篩選：</span>
             </div>
             <select
               value={filterAction}
               onChange={e => { setFilterAction(e.target.value); setOffset(0); }}
-              className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm dark:bg-gray-800 dark:text-white"
             >
               <option value="">所有操作</option>
               <option value="CREATE">創建</option>
@@ -134,7 +134,7 @@ const AdminAuditLogs: React.FC = () => {
             <select
               value={filterTarget}
               onChange={e => { setFilterTarget(e.target.value); setOffset(0); }}
-              className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm dark:bg-gray-800 dark:text-white"
             >
               <option value="">所有類型</option>
               <option value="order">訂單</option>
@@ -148,23 +148,23 @@ const AdminAuditLogs: React.FC = () => {
               value={filterAdmin}
               onChange={e => { setFilterAdmin(e.target.value); setOffset(0); }}
               placeholder="管理員名稱"
-              className="px-3 py-2 border border-gray-300 rounded-lg text-sm w-40"
+              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm w-40 dark:bg-gray-800 dark:text-white"
             />
           </div>
           <div className="flex flex-wrap gap-4 items-center">
-            <span className="text-sm text-gray-500">日期範圍：</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400">日期範圍：</span>
             <input
               type="date"
               value={filterStartDate}
               onChange={e => { setFilterStartDate(e.target.value); setOffset(0); }}
-              className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm dark:bg-gray-800 dark:text-white"
             />
-            <span className="text-sm text-gray-400">至</span>
+            <span className="text-sm text-gray-400 dark:text-gray-500">至</span>
             <input
               type="date"
               value={filterEndDate}
               onChange={e => { setFilterEndDate(e.target.value); setOffset(0); }}
-              className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm dark:bg-gray-800 dark:text-white"
             />
             {(filterAction || filterTarget || filterAdmin || filterStartDate || filterEndDate) && (
               <button
@@ -186,51 +186,51 @@ const AdminAuditLogs: React.FC = () => {
 
         {/* Logs Table */}
         {loading ? (
-          <div className="bg-white rounded shadow p-8 text-center text-gray-500">加載中...</div>
+          <div className="bg-white dark:bg-gray-800 rounded shadow p-8 text-center text-gray-500 dark:text-gray-400">加載中...</div>
         ) : (
-          <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
             <table className="min-w-full">
-              <thead className="bg-gray-50">
+              <thead className="bg-gray-50 dark:bg-gray-900">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">時間</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">用戶</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">操作</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">類型</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">目標ID</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">詳情</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">IP</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">時間</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">用戶</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">操作</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">類型</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">目標ID</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">詳情</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">IP</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                 {logs.map(log => {
                   const actionInfo = actionLabels[log.action] || { label: log.action, color: 'bg-gray-100 text-gray-800' };
                   return (
-                    <tr key={log.id} className="hover:bg-gray-50">
-                      <td className="px-4 py-3 text-sm text-gray-600 whitespace-nowrap">{formatDate(log.created_at)}</td>
+                    <tr key={log.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                      <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-300 whitespace-nowrap">{formatDate(log.created_at)}</td>
                       <td className="px-4 py-3 text-sm">
                         <div className="font-medium">{log.admin_username}</div>
-                        <div className="text-xs text-gray-400">{log.admin_role}</div>
+                        <div className="text-xs text-gray-400 dark:text-gray-500">{log.admin_role}</div>
                       </td>
                       <td className="px-4 py-3">
                         <span className={`inline-flex px-2 py-1 rounded text-xs font-medium ${actionInfo.color}`}>
                           {actionInfo.label}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-600">
+                      <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">
                         {targetTypeLabels[log.target_type] || log.target_type}
                       </td>
-                      <td className="px-4 py-3 text-sm font-mono text-gray-500">{log.target_id}</td>
-                      <td className="px-4 py-3 text-sm text-gray-600 max-w-xs truncate">
+                      <td className="px-4 py-3 text-sm font-mono text-gray-500 dark:text-gray-400">{log.target_id}</td>
+                      <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-300 max-w-xs truncate">
                         {log.details ? JSON.stringify(parseDetails(log.details)).slice(0, 80) + (JSON.stringify(parseDetails(log.details)).length > 80 ? '...' : '') : '-'}
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-400 font-mono">{log.ip_address || '-'}</td>
+                      <td className="px-4 py-3 text-sm text-gray-400 dark:text-gray-500 font-mono">{log.ip_address || '-'}</td>
                     </tr>
                   );
                 })}
               </tbody>
             </table>
             {logs.length === 0 && (
-              <div className="p-8 text-center text-gray-500">沒有日誌記錄</div>
+              <div className="p-8 text-center text-gray-500 dark:text-gray-400">沒有日誌記錄</div>
             )}
           </div>
         )}
@@ -240,17 +240,17 @@ const AdminAuditLogs: React.FC = () => {
           <button
             onClick={() => setOffset(Math.max(0, offset - limit))}
             disabled={offset === 0}
-            className="flex items-center px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm hover:bg-gray-50 disabled:opacity-50"
+            className="flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 dark:text-white"
           >
             <ChevronLeft size={16} className="mr-1" /> 上一頁
           </button>
-          <span className="text-sm text-gray-500">
+          <span className="text-sm text-gray-500 dark:text-gray-400">
             第 {offset + 1} - {offset + logs.length} 條
           </span>
           <button
             onClick={() => setOffset(offset + limit)}
             disabled={!hasMore}
-            className="flex items-center px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm hover:bg-gray-50 disabled:opacity-50"
+            className="flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 dark:text-white"
           >
             下一頁 <ChevronRight size={16} className="ml-1" />
           </button>
