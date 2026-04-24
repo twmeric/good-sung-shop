@@ -34,3 +34,8 @@ npm-debug.log*
 
 # Uploads (local dev only)
 upload/
+chat/                          # WhatsApp chat attachment cache (local dev)
+
+# Worker local dev state
+worker/.wrangler/state/        # Local D1 SQLite files
+worker/dist/                   # Worker build output
