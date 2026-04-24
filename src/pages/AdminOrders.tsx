@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AdminLayout from '../components/AdminLayout';
 import { apiFetch } from '../lib/api';
+import { Download } from 'lucide-react';
 
 interface Order {
   id: number;
@@ -108,6 +109,51 @@ const AdminOrders: React.FC = () => {
     setFilters({ searchTerm: '', deliveryDateStart: '', deliveryDateEnd: '', paymentStatus: '' });
   };
 
+  const exportToCSV = () => {
+    const headers = ['訂單號', '下單日期', '姓名', '電話', '屋苑', '地址', '配送日期', '產品詳情', '總額(HK$)', '付款狀態', '訂單狀態', '備註'];
+    const rows = filteredOrders.map(order => {
+      let productDetail = '';
+      try {
+        const items = JSON.parse(order.items || '[]');
+        productDetail = items.map((item: any) => {
+          const pkg = item.packageType === '2-dish-1-soup' ? '2餸1湯' : '3餸1湯';
+          const dishes = (item.selectedDishes || []).join('+');
+          const soup = item.selectedSoup || '';
+          return `${pkg}x${item.quantity}(${dishes};${soup})`;
+        }).join('; ');
+      } catch { productDetail = ''; }
+
+      const status = getOrderStatus(order);
+
+      return [
+        order.orderNum || String(order.createdAt).slice(-4),
+        new Date(order.createdAt * 1000).toLocaleDateString('zh-HK'),
+        order.name,
+        order.phone,
+        order.estate || '',
+        '', // address not in current data
+        order.deliveryDate,
+        productDetail,
+        order.totalPrice,
+        order.paymentConfirmed === 1 ? '已付款' : order.paymentProof ? '待審核' : '未付款',
+        status.label,
+        '', // remarks not in current data
+      ];
+    });
+
+    const csvContent = [headers, ...rows]
+      .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+      .join('\n');
+
+    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `orders_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const filteredOrders = orders.filter(order => {
     const orderNum = String(order.createdAt).slice(-4);
     const searchLower = filters.searchTerm.toLowerCase();
@@ -188,6 +234,14 @@ const AdminOrders: React.FC = () => {
               共 <span className="font-bold text-gray-800">{filteredOrders.length}</span> 筆
               {hasActiveFilters && <span className="text-purple-600 text-xs ml-1">（已篩選）</span>}
             </div>
+            <button
+              onClick={exportToCSV}
+              disabled={filteredOrders.length === 0}
+              className="flex items-center gap-1 text-xs text-green-600 hover:text-green-800 font-medium px-2 py-1 border border-green-200 rounded hover:bg-green-50 disabled:opacity-40"
+              title="導出當前篩選結果為 CSV"
+            >
+              <Download size={14} /> CSV
+            </button>
             {hasActiveFilters && (
               <button
                 onClick={clearFilters}

@@ -4,7 +4,8 @@ import AdminLayout from '../components/AdminLayout';
 import { apiFetch } from '../lib/api';
 import {
   DollarSign, ShoppingCart, Users, CreditCard,
-  CheckCircle, Clock, Calendar, TrendingUp, ArrowRight
+  CheckCircle, Clock, Calendar, TrendingUp, ArrowRight,
+  AlertTriangle, Package
 } from 'lucide-react';
 
 const isToday = (timestamp: number) => {
@@ -15,12 +16,14 @@ const isToday = (timestamp: number) => {
 
 const AdminDashboard: React.FC = () => {
   const [orders, setOrders] = useState<any[]>([]);
+  const [lowStockProducts, setLowStockProducts] = useState<any[]>([]);
   const navigate = useNavigate();
 
   useEffect(() => {
     const token = localStorage.getItem('admin_token');
     if (!token) { navigate('/admin'); return; }
     fetchOrders();
+    fetchLowStock();
   }, []);
 
   const fetchOrders = async () => {
@@ -31,6 +34,15 @@ const AdminDashboard: React.FC = () => {
 
   const handleLogout = () => {
     if (confirm('確定要登出嗎？')) { localStorage.removeItem('admin_token'); navigate('/admin'); }
+  };
+
+  const fetchLowStock = async () => {
+    const res = await apiFetch('/api/public/admin/products');
+    if (res.ok) {
+      const products = await res.json();
+      const low = products.filter((p: any) => p.category !== 'package' && p.stock_quantity < 15);
+      setLowStockProducts(low.sort((a: any, b: any) => a.stock_quantity - b.stock_quantity));
+    }
   };
 
   // KPI calculations
@@ -150,6 +162,41 @@ const AdminDashboard: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Low Stock Alert */}
+      {lowStockProducts.length > 0 && (
+        <div className="mb-6 bg-white rounded-xl shadow-sm border border-orange-200 p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <AlertTriangle className="w-5 h-5 text-orange-500" />
+            <h3 className="text-lg font-bold text-gray-800">庫存預警</h3>
+            <span className="text-sm text-orange-600 font-medium">({lowStockProducts.length} 項)</span>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
+            {lowStockProducts.map(p => (
+              <div
+                key={p.id}
+                onClick={() => navigate('/admin/products')}
+                className={`p-3 rounded-lg border cursor-pointer hover:shadow-md transition-all ${
+                  p.stock_quantity === 0
+                    ? 'bg-red-50 border-red-200'
+                    : 'bg-orange-50 border-orange-200'
+                }`}
+              >
+                <div className="text-xs text-gray-500">{p.category === 'dish' ? '餸菜' : '湯品'}</div>
+                <div className="font-medium text-gray-800 text-sm truncate">{p.name}</div>
+                <div className={`text-lg font-bold ${
+                  p.stock_quantity === 0 ? 'text-red-600' : 'text-orange-600'
+                }`}>
+                  {p.stock_quantity}
+                  <span className="text-xs font-normal ml-1">
+                    {p.stock_quantity === 0 ? '(缺貨)' : '(即將售罄)'}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Recent Orders + Quick Actions */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

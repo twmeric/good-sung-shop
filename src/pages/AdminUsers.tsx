@@ -15,6 +15,12 @@ interface AdminUserItem {
   created_at: number;
 }
 
+interface WhatsAppResult {
+  success: boolean;
+  sent?: boolean;
+  error?: string;
+}
+
 const roleLabels: Record<string, string> = {
   super_admin: '系統管理員',
   admin: '管理員',
@@ -37,6 +43,7 @@ const AdminUsers: React.FC = () => {
     phone: '',
     is_active: true,
   });
+  const [whatsappStatus, setWhatsappStatus] = useState<string>('');
 
   const [editData, setEditData] = useState<Partial<AdminUserItem>>({});
 
@@ -88,8 +95,13 @@ const AdminUsers: React.FC = () => {
         }),
       });
       if (res.ok) {
+        const data = await res.json();
         setShowForm(false);
         setFormData({ username: '', password: '', role: 'admin', display_name: '', phone: '', is_active: true });
+        if (data.whatsappSent) {
+          setWhatsappStatus('登入資料已發送至 WhatsApp');
+          setTimeout(() => setWhatsappStatus(''), 5000);
+        }
         fetchUsers();
       } else {
         const data = await res.json();
@@ -173,6 +185,12 @@ const AdminUsers: React.FC = () => {
             <button onClick={() => setError('')} className="text-red-500 hover:text-red-700">✕</button>
           </div>
         )}
+        {whatsappStatus && (
+          <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg text-green-700 flex justify-between items-center">
+            <span>{whatsappStatus}</span>
+            <button onClick={() => setWhatsappStatus('')} className="text-green-500 hover:text-green-700">✕</button>
+          </div>
+        )}
 
         {/* Create Button */}
         <div className="mb-6">
@@ -231,7 +249,7 @@ const AdminUsers: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">電話</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">WhatsApp</label>
                 <input
                   value={formData.phone}
                   onChange={e => setFormData({ ...formData, phone: e.target.value })}
@@ -270,7 +288,7 @@ const AdminUsers: React.FC = () => {
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">帳號</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">名稱</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">角色</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">電話</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">WhatsApp</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">狀態</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">操作</th>
                 </tr>

@@ -43,6 +43,9 @@ const AdminAuditLogs: React.FC = () => {
   const [hasMore, setHasMore] = useState(false);
   const [filterAction, setFilterAction] = useState('');
   const [filterTarget, setFilterTarget] = useState('');
+  const [filterAdmin, setFilterAdmin] = useState('');
+  const [filterStartDate, setFilterStartDate] = useState('');
+  const [filterEndDate, setFilterEndDate] = useState('');
 
   const token = localStorage.getItem('admin_token');
   const limit = 50;
@@ -53,7 +56,7 @@ const AdminAuditLogs: React.FC = () => {
       return;
     }
     fetchLogs();
-  }, [token, navigate, offset, filterAction, filterTarget]);
+  }, [token, navigate, offset, filterAction, filterTarget, filterAdmin, filterStartDate, filterEndDate]);
 
   const fetchLogs = async () => {
     try {
@@ -63,6 +66,9 @@ const AdminAuditLogs: React.FC = () => {
       params.append('offset', String(offset));
       if (filterAction) params.append('action', filterAction);
       if (filterTarget) params.append('target_type', filterTarget);
+      if (filterAdmin) params.append('admin_username', filterAdmin);
+      if (filterStartDate) params.append('start_date', filterStartDate);
+      if (filterEndDate) params.append('end_date', filterEndDate);
 
       const res = await fetch(`${API_BASE}/api/admin/audit-logs?${params}`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -107,33 +113,75 @@ const AdminAuditLogs: React.FC = () => {
         )}
 
         {/* Filters */}
-        <div className="mb-6 bg-white rounded-lg shadow p-4 flex flex-wrap gap-4 items-center">
-          <div className="flex items-center gap-2">
-            <Filter size={18} className="text-gray-500" />
-            <span className="text-sm font-medium text-gray-700">篩選：</span>
+        <div className="mb-6 bg-white rounded-lg shadow p-4">
+          <div className="flex flex-wrap gap-4 items-center mb-3">
+            <div className="flex items-center gap-2">
+              <Filter size={18} className="text-gray-500" />
+              <span className="text-sm font-medium text-gray-700">篩選：</span>
+            </div>
+            <select
+              value={filterAction}
+              onChange={e => { setFilterAction(e.target.value); setOffset(0); }}
+              className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+            >
+              <option value="">所有操作</option>
+              <option value="CREATE">創建</option>
+              <option value="UPDATE">更新</option>
+              <option value="DELETE">刪除</option>
+              <option value="LOGIN">登入</option>
+              <option value="COMPLETE">完成</option>
+            </select>
+            <select
+              value={filterTarget}
+              onChange={e => { setFilterTarget(e.target.value); setOffset(0); }}
+              className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+            >
+              <option value="">所有類型</option>
+              <option value="order">訂單</option>
+              <option value="product">產品</option>
+              <option value="user">用戶</option>
+              <option value="setting">設置</option>
+              <option value="whatsapp">WhatsApp</option>
+            </select>
+            <input
+              type="text"
+              value={filterAdmin}
+              onChange={e => { setFilterAdmin(e.target.value); setOffset(0); }}
+              placeholder="管理員名稱"
+              className="px-3 py-2 border border-gray-300 rounded-lg text-sm w-40"
+            />
           </div>
-          <select
-            value={filterAction}
-            onChange={e => { setFilterAction(e.target.value); setOffset(0); }}
-            className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
-          >
-            <option value="">所有操作</option>
-            <option value="CREATE">創建</option>
-            <option value="UPDATE">更新</option>
-            <option value="DELETE">刪除</option>
-            <option value="LOGIN">登入</option>
-          </select>
-          <select
-            value={filterTarget}
-            onChange={e => { setFilterTarget(e.target.value); setOffset(0); }}
-            className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
-          >
-            <option value="">所有類型</option>
-            <option value="order">訂單</option>
-            <option value="product">產品</option>
-            <option value="user">用戶</option>
-            <option value="setting">設置</option>
-          </select>
+          <div className="flex flex-wrap gap-4 items-center">
+            <span className="text-sm text-gray-500">日期範圍：</span>
+            <input
+              type="date"
+              value={filterStartDate}
+              onChange={e => { setFilterStartDate(e.target.value); setOffset(0); }}
+              className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+            />
+            <span className="text-sm text-gray-400">至</span>
+            <input
+              type="date"
+              value={filterEndDate}
+              onChange={e => { setFilterEndDate(e.target.value); setOffset(0); }}
+              className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+            />
+            {(filterAction || filterTarget || filterAdmin || filterStartDate || filterEndDate) && (
+              <button
+                onClick={() => {
+                  setFilterAction('');
+                  setFilterTarget('');
+                  setFilterAdmin('');
+                  setFilterStartDate('');
+                  setFilterEndDate('');
+                  setOffset(0);
+                }}
+                className="text-sm text-red-500 hover:text-red-700 underline"
+              >
+                清除篩選
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Logs Table */}

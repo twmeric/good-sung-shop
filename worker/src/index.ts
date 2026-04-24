@@ -1541,6 +1541,19 @@ app.post("/api/admin/users", authMiddleware(["super_admin"]), async (c) => {
       logAudit(c.env.DB, user, "CREATE", "user", body.username, { role: body.role })
     );
 
+    // Send WhatsApp notification to new user if phone provided
+    if (body.phone) {
+      const roleLabel = body.role === 'super_admin' ? '系統管理員' : body.role === 'admin' ? '管理員' : '產品供應商';
+      const msg = `【好餸管理後台】\n\n您的帳號已創建！\n\n用戶名：${body.username}\n密碼：${body.password}\n角色：${roleLabel}\n\n登入網址：\nhttps://goodstore.jkdcoding.com/admin\n\n請妥善保存您的登入資料。`;
+      c.executionCtx?.waitUntil(
+        sendWhatsAppMessage(c.env, body.phone, msg).then((result: any) => {
+          if (!result.success) {
+            console.error("[WHATSAPP] Failed to send login info to new user:", result.error);
+          }
+        })
+      );
+    }
+
     return jsonResponse({ success: true }, 201);
   } catch (e: any) {
     if (e.message?.includes("UNIQUE constraint failed")) {
@@ -1659,6 +1672,9 @@ app.get("/api/admin/audit-logs", authMiddleware(["super_admin"]), async (c) => {
     const offset = parseInt(c.req.query("offset") || "0");
     const action = c.req.query("action");
     const targetType = c.req.query("target_type");
+    const adminUsername = c.req.query("admin_username");
+    const startDate = c.req.query("start_date");
+    const endDate = c.req.query("end_date");
 
     let sql = `SELECT * FROM admin_audit_logs`;
     const conditions: string[] = [];
@@ -1666,6 +1682,9 @@ app.get("/api/admin/audit-logs", authMiddleware(["super_admin"]), async (c) => {
 
     if (action) { conditions.push("action = ?"); params.push(action); }
     if (targetType) { conditions.push("target_type = ?"); params.push(targetType); }
+    if (adminUsername) { conditions.push("admin_username = ?"); params.push(adminUsername); }
+    if (startDate) { conditions.push("created_at >= ?"); params.push(Math.floor(new Date(startDate).getTime() / 1000)); }
+    if (endDate) { conditions.push("created_at <= ?"); params.push(Math.floor(new Date(endDate + 'T23:59:59').getTime() / 1000)); }
 
     if (conditions.length > 0) {
       sql += ` WHERE ${conditions.join(" AND ")}`;
