@@ -1511,7 +1511,7 @@ app.get("/api/public/admin/scenarios", authMiddleware(["super_admin"]), async (c
     const { results } = await c.env.DB.prepare(
       `SELECT * FROM campaigns ORDER BY created_at DESC`
     ).all();
-    return jsonResponse(results || []);
+    return jsonResponse((results || []).map(snakeToCamel));
   } catch (e) {
     return jsonResponse({ error: "Failed" }, 500);
   }
@@ -1536,7 +1536,7 @@ app.post("/api/public/admin/scenarios", authMiddleware(["super_admin"]), async (
   }
 });
 
-app.get("/api/public/admin/scenarios/:key", async (c) => {
+app.get("/api/public/admin/scenarios/:key", authMiddleware(["super_admin"]), async (c) => {
   try {
     const key = c.req.param("key");
     const row = await c.env.DB.prepare(
