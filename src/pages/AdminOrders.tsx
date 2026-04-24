@@ -3,6 +3,22 @@ import { useNavigate } from 'react-router-dom';
 import AdminLayout from '../components/AdminLayout';
 import { apiFetch } from '../lib/api';
 
+interface Order {
+  id: number;
+  orderNum: string;
+  createdAt: number;
+  name: string;
+  phone: string;
+  estate: string | null;
+  items: any[];
+  totalPrice: number;
+  deliveryDate: string;
+  paymentConfirmed: number;
+  orderCompleted: number;
+  paymentProof?: string;
+  referralCode?: string;
+}
+
 interface Filters {
   searchTerm: string;
   deliveryDateStart: string;
@@ -10,8 +26,21 @@ interface Filters {
   paymentStatus: string;
 }
 
+const getOrderStatus = (order: Order) => {
+  if (order.paymentConfirmed === 0) {
+    return { label: '待付款', color: 'bg-red-100 text-red-700' };
+  }
+  if (order.paymentConfirmed === 1 && order.orderCompleted === 0) {
+    return { label: '已付款', color: 'bg-orange-100 text-orange-700' };
+  }
+  if (order.orderCompleted === 1) {
+    return { label: '訂單完成', color: 'bg-green-100 text-green-700' };
+  }
+  return { label: '未知', color: 'bg-gray-100 text-gray-700' };
+};
+
 const AdminOrders: React.FC = () => {
-  const [orders, setOrders] = useState<any[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [filters, setFilters] = useState<Filters>({
     searchTerm: '',
     deliveryDateStart: '',
@@ -49,6 +78,15 @@ const AdminOrders: React.FC = () => {
     if (res.ok) fetchOrders();
   };
 
+  const handleComplete = async (id: number) => {
+    const res = await apiFetch(`/api/public/admin/orders/${id}/complete`, {
+      method: 'POST'
+    });
+    if (res.ok) {
+      fetchOrders();
+    }
+  };
+
   const handleLogout = () => {
     if (confirm('確定要登出嗎？')) {
       localStorage.removeItem('admin_token');
@@ -60,7 +98,7 @@ const AdminOrders: React.FC = () => {
     setFilters(prev => ({ ...prev, [key]: value }));
   };
 
-  const getReferrer = (order: any) => {
+  const getReferrer = (order: Order) => {
     if (!order.referralCode) return '-';
     const referrer = orders.find(o => o.phone && o.phone.slice(-4) === order.referralCode && o.id !== order.id);
     return referrer ? referrer.name : '-';
@@ -90,6 +128,7 @@ const AdminOrders: React.FC = () => {
       String(order.id).includes(filters.searchTerm) ||
       (order.name && order.name.toLowerCase().includes(searchLower)) ||
       (order.phone && order.phone.includes(filters.searchTerm)) ||
+      (order.estate && order.estate.includes(filters.searchTerm)) ||
       (order.items && JSON.stringify(order.items).toLowerCase().includes(searchLower))) &&
       deliveryDateMatch &&
       paymentStatusMatch
@@ -171,51 +210,55 @@ const AdminOrders: React.FC = () => {
               <th className="p-4">下單日期</th>
               <th className="p-4">姓名</th>
               <th className="p-4">電話</th>
+              <th className="p-4">屋苑</th>
               <th className="p-4">產品</th>
               <th className="p-4">總額</th>
               <th className="p-4">配送日期</th>
-              <th className="p-4">付款狀態</th>
+              <th className="p-4">訂單狀態</th>
               <th className="p-4">操作</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
-            {filteredOrders.map(order => (
-              <tr key={order.id} className="hover:bg-purple-50 transition-colors">
-                <td className="p-4 text-sm text-gray-600">{order.id}</td>
-                <td className="p-4 font-mono font-bold text-purple-600 text-sm">{String(order.createdAt).slice(-4)}</td>
-                <td className="p-4 text-sm text-gray-600 whitespace-nowrap">{new Date(order.createdAt * 1000).toLocaleDateString('zh-HK')}</td>
-                <td className="p-4 text-sm font-medium text-gray-800">{order.name}</td>
-                <td className="p-4 text-sm text-gray-600">{order.phone}</td>
-                <td className="p-4 text-sm text-gray-600 max-w-xs">
-                  {(() => {
-                    try {
-                      const items = JSON.parse(order.items || '[]');
-                      return items.map((item: any) =>
-                        `${item.packageType === '2-dish-1-soup' ? '2餸1湯' : '3餸1湯'} x${item.quantity}`
-                      ).join(', ');
-                    } catch { return '-'; }
-                  })()}
-                </td>
-                <td className="p-4 text-sm font-bold text-gray-800">HK${order.totalPrice}</td>
-                <td className="p-4 text-sm text-gray-600 whitespace-nowrap">{order.deliveryDate}</td>
-                <td className="p-4">
-                  {order.paymentConfirmed === 1 ? (
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">已付款</span>
-                  ) : order.paymentProof ? (
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800">待審核</span>
-                  ) : (
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">未付款</span>
-                  )}
-                </td>
-                <td className="p-4 space-x-1">
-                  <button onClick={() => navigate(`/admin/orders/${order.id}`)} className="bg-blue-500 text-white px-3 py-1.5 rounded text-xs hover:bg-blue-600 transition-colors">詳情</button>
-                  <button onClick={() => handleDelete(order.id)} className="bg-red-500 text-white px-3 py-1.5 rounded text-xs hover:bg-red-600 transition-colors">刪除</button>
-                </td>
-              </tr>
-            ))}
+            {filteredOrders.map(order => {
+              const status = getOrderStatus(order);
+              return (
+                <tr key={order.id} className="hover:bg-purple-50 transition-colors">
+                  <td className="p-4 text-sm text-gray-600">{order.id}</td>
+                  <td className="p-4 font-mono font-bold text-purple-600 text-sm">{String(order.createdAt).slice(-4)}</td>
+                  <td className="p-4 text-sm text-gray-600 whitespace-nowrap">{new Date(order.createdAt * 1000).toLocaleDateString('zh-HK')}</td>
+                  <td className="p-4 text-sm font-medium text-gray-800">{order.name}</td>
+                  <td className="p-4 text-sm text-gray-600">{order.phone}</td>
+                  <td className="p-4 text-sm text-gray-600">{order.estate || '-'}</td>
+                  <td className="p-4 text-sm text-gray-600 max-w-xs">
+                    {(() => {
+                      try {
+                        const items = JSON.parse(order.items || '[]');
+                        return items.map((item: any) =>
+                          `${item.packageType === '2-dish-1-soup' ? '2餸1湯' : '3餸1湯'} x${item.quantity}`
+                        ).join(', ');
+                      } catch { return '-'; }
+                    })()}
+                  </td>
+                  <td className="p-4 text-sm font-bold text-gray-800">HK${order.totalPrice}</td>
+                  <td className="p-4 text-sm text-gray-600 whitespace-nowrap">{order.deliveryDate}</td>
+                  <td className="p-4">
+                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${status.color}`}>
+                      {status.label}
+                    </span>
+                  </td>
+                  <td className="p-4 space-x-1">
+                    <button onClick={() => navigate(`/admin/orders/${order.id}`)} className="bg-blue-500 text-white px-3 py-1.5 rounded text-xs hover:bg-blue-600 transition-colors">詳情</button>
+                    {order.paymentConfirmed === 1 && order.orderCompleted === 0 && (
+                      <button onClick={() => handleComplete(order.id)} className="bg-green-500 text-white px-3 py-1.5 rounded text-xs hover:bg-green-600 transition-colors">標記完成</button>
+                    )}
+                    <button onClick={() => handleDelete(order.id)} className="bg-red-500 text-white px-3 py-1.5 rounded text-xs hover:bg-red-600 transition-colors">刪除</button>
+                  </td>
+                </tr>
+              );
+            })}
             {filteredOrders.length === 0 && (
               <tr>
-                <td colSpan={10} className="p-8 text-center text-gray-500">
+                <td colSpan={11} className="p-8 text-center text-gray-500">
                   {orders.length === 0 ? '暫無訂單' : '沒有找到相符的訂單'}
                 </td>
               </tr>

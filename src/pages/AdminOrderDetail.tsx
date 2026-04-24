@@ -12,17 +12,43 @@ interface Message {
   createdAt: number;
 }
 
+interface Order {
+  id: number;
+  createdAt: number;
+  paymentConfirmed: number;
+  paymentProof?: string;
+  uploads?: any[];
+  name: string;
+  phone: string;
+  region: string;
+  address: string;
+  estate: string | null;
+  deliveryDate: string;
+  deliveryTime?: string;
+  items?: string;
+  totalPrice: number;
+  remarks?: string;
+  adminRemarks?: string;
+  orderCompleted: number;
+  [key: string]: any;
+}
+
 const AdminOrderDetail: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [order, setOrder] = useState<any>(null);
+  const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [confirming, setConfirming] = useState(false);
+  const [completing, setCompleting] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [replyText, setReplyText] = useState('');
   const [sendLoading, setSendLoading] = useState(false);
   const [chatLoading, setChatLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const storedUser = localStorage.getItem('admin_user');
+  const currentUser = storedUser ? JSON.parse(storedUser) : null;
+  const isAdmin = currentUser?.role === 'admin' || currentUser?.role === 'super_admin';
 
   useEffect(() => {
     const token = localStorage.getItem('admin_token');
@@ -82,6 +108,20 @@ const AdminOrderDetail: React.FC = () => {
     setConfirming(false);
   };
 
+  const handleCompleteOrder = async () => {
+    if (!order) return;
+    if (!confirm('確認標記此訂單為已完成？')) return;
+    setCompleting(true);
+    const res = await apiFetch(`/api/public/admin/orders/${order.id}/complete`, { method: 'POST' });
+    if (res.ok) {
+      alert('訂單已標記為完成');
+      await fetchOrder();
+    } else {
+      alert('標記失敗');
+    }
+    setCompleting(false);
+  };
+
   const handleSendMessage = async () => {
     if (!order?.phone || !replyText.trim()) return;
     setSendLoading(true);
@@ -131,12 +171,12 @@ const AdminOrderDetail: React.FC = () => {
         </button>
         <div className="flex items-center gap-3">
           <h1 className="text-2xl font-bold text-gray-800">訂單 #{String(order.createdAt).slice(-4)}</h1>
-          {order.paymentConfirmed === 1 ? (
-            <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">已付款</span>
-          ) : order.paymentProof ? (
-            <span className="px-3 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800">待審核</span>
+          {order.orderCompleted === 1 ? (
+            <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">訂單完成</span>
+          ) : order.paymentConfirmed === 1 ? (
+            <span className="px-3 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">已付款 / 處理中</span>
           ) : (
-            <span className="px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">未付款</span>
+            <span className="px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">待付款</span>
           )}
         </div>
         <p className="text-sm text-gray-500 mt-1">下單時間：{new Date(order.createdAt * 1000).toLocaleString('zh-HK')}</p>
@@ -229,6 +269,10 @@ const AdminOrderDetail: React.FC = () => {
                 <label className="block text-xs font-medium text-gray-500 mb-1 flex items-center gap-1"><MapPin className="w-3 h-3" /> 地址</label>
                 <div className="w-full p-2.5 bg-gray-100 border border-gray-200 rounded-lg text-sm text-gray-700">{order.region} {order.address}</div>
               </div>
+              <div className="col-span-2">
+                <label className="block text-xs font-medium text-gray-500 mb-1 flex items-center gap-1"><MapPin className="w-3 h-3" /> 屋苑</label>
+                <div className="w-full p-2.5 bg-gray-100 border border-gray-200 rounded-lg text-sm text-gray-700">{order.estate || '-'}</div>
+              </div>
               <div>
                 <label className="block text-xs font-medium text-gray-500 mb-1 flex items-center gap-1"><Calendar className="w-3 h-3" /> 配送日期</label>
                 <div className="w-full p-2.5 bg-gray-100 border border-gray-200 rounded-lg text-sm text-gray-700">{order.deliveryDate}</div>
@@ -267,6 +311,18 @@ const AdminOrderDetail: React.FC = () => {
                 <label className="block text-xs font-medium text-gray-500 mb-1 text-red-500">管理員備註</label>
                 <textarea className="w-full p-2.5 border border-red-200 bg-red-50 rounded-lg text-sm focus:ring-2 focus:ring-red-500 outline-none resize-none" rows={2} value={order.adminRemarks || ''} onChange={e => setOrder({...order, adminRemarks: e.target.value})} />
               </div>
+              {order.paymentConfirmed === 1 && order.orderCompleted === 0 && isAdmin && (
+                <div className="mb-4">
+                  <button
+                    type="button"
+                    onClick={handleCompleteOrder}
+                    disabled={completing}
+                    className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700 disabled:opacity-50 transition-colors"
+                  >
+                    {completing ? '處理中...' : '標記訂單完成'}
+                  </button>
+                </div>
+              )}
               <div className="flex gap-2">
                 <button type="submit" className="bg-purple-600 text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors">儲存備註</button>
                 <button type="button" onClick={() => navigate('/admin/orders')} className="bg-gray-200 text-gray-700 px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-300 transition-colors">取消</button>

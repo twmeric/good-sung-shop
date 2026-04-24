@@ -36,6 +36,7 @@ interface OrderPackage {
 
 interface DeliveryInfo {
   address: string;
+  estate: string;
   deliveryDate: string;
   name: string;
   remarks: string;
@@ -130,7 +131,7 @@ const OrderLanding: React.FC = () => {
 
   // ── Delivery ──
   const [delivery, setDelivery] = useState<DeliveryInfo>({
-    address: '', deliveryDate: '', name: '', remarks: ''
+    address: '', estate: '善樓', deliveryDate: '', name: '', remarks: ''
   });
   const [minDateStr, setMinDateStr] = useState('');
 
@@ -518,6 +519,7 @@ const OrderLanding: React.FC = () => {
           totalPrice: cartTotal,
           region: 'HK',
           address: delivery.address,
+          estate: delivery.estate,
           deliveryDate: delivery.deliveryDate,
           deliveryTime: '10:00-13:00',
           name: delivery.name,
@@ -832,6 +834,20 @@ const OrderLanding: React.FC = () => {
             </div>
 
             <form onSubmit={(e) => { e.preventDefault(); setStep('verify'); }} className="bg-white rounded-2xl shadow-lg p-6 md:p-8 space-y-6">
+              {/* Estate */}
+              <div>
+                <label className="block text-xl font-bold text-gray-800 mb-2">送貨屋苑</label>
+                <select
+                  name="estate"
+                  required
+                  value={delivery.estate}
+                  onChange={handleDeliveryChange}
+                  className="w-full p-4 text-xl border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none bg-white"
+                >
+                  <option value="善樓">善樓</option>
+                </select>
+              </div>
+
               {/* Address */}
               <div>
                 <label className="block text-xl font-bold text-gray-800 mb-2">送貨地址</label>

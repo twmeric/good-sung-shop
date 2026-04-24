@@ -8,6 +8,7 @@ const API_BASE = 'https://good-sung-shop.jimsbond007.workers.dev';
 interface Product {
   id: number;
   category: 'dish' | 'soup' | 'package';
+  product_code: string | null;
   name: string;
   description: string | null;
   price: number | null;
@@ -277,6 +278,7 @@ const AdminProducts: React.FC = () => {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">類別</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">編號</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">名稱</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">描述</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">價格</th>
@@ -298,6 +300,18 @@ const AdminProducts: React.FC = () => {
                           <CatIcon size={14} />
                           {cat.label}
                         </span>
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-500">
+                        {isEditing ? (
+                          <input
+                            value={editForm.product_code || ''}
+                            onChange={e => setEditForm({ ...editForm, product_code: e.target.value })}
+                            className="w-20 px-2 py-1 border border-gray-300 rounded text-sm"
+                            placeholder="編號"
+                          />
+                        ) : (
+                          <code className="bg-gray-100 px-2 py-0.5 rounded text-xs">{product.product_code || '-'}</code>
+                        )}
                       </td>
                       <td className="px-4 py-3">
                         {isEditing ? (

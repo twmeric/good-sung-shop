@@ -89,7 +89,12 @@ function generateToken(): string {
 }
 
 function generateOrderNum(): string {
-  return String(Math.floor(Date.now() / 1000)).slice(-4);
+  // 2 random uppercase letters (excluding I, L, O, Z to avoid confusion with numbers) + 4 digits
+  const letters = "ABCDEFGHJKMNPQRSTUVWXY";
+  const letter1 = letters.charAt(Math.floor(Math.random() * letters.length));
+  const letter2 = letters.charAt(Math.floor(Math.random() * letters.length));
+  const digits = String(Math.floor(1000 + Math.random() * 9000));
+  return letter1 + letter2 + digits;
 }
 
 function generateVerifyCode(): string {
@@ -192,6 +197,7 @@ async function initDB(db: D1Database, env: Env) {
       total_price INTEGER NOT NULL,
       region TEXT NOT NULL,
       address TEXT NOT NULL,
+      estate TEXT,
       delivery_date TEXT NOT NULL,
       delivery_time TEXT NOT NULL,
       name TEXT NOT NULL,
@@ -201,6 +207,7 @@ async function initDB(db: D1Database, env: Env) {
       referral_code TEXT,
       campaign_name TEXT DEFAULT 'good-sung-default',
       payment_confirmed INTEGER DEFAULT 0,
+      order_completed INTEGER DEFAULT 0,
       payment_proof TEXT,
       order_num TEXT,
       created_at INTEGER DEFAULT (unixepoch())
@@ -244,6 +251,7 @@ async function initDB(db: D1Database, env: Env) {
     `CREATE TABLE IF NOT EXISTS cms_products (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       category TEXT NOT NULL,
+      product_code TEXT,
       name TEXT NOT NULL,
       description TEXT,
       price INTEGER,
@@ -316,6 +324,9 @@ async function initDB(db: D1Database, env: Env) {
     `ALTER TABLE admin_users ADD COLUMN created_at INTEGER DEFAULT (unixepoch())`,
     `ALTER TABLE admin_users ADD COLUMN updated_at INTEGER DEFAULT (unixepoch())`,
     `ALTER TABLE cms_products ADD COLUMN stock_quantity INTEGER DEFAULT 0`,
+    `ALTER TABLE order_records ADD COLUMN estate TEXT`,
+    `ALTER TABLE order_records ADD COLUMN order_completed INTEGER DEFAULT 0`,
+    `ALTER TABLE cms_products ADD COLUMN product_code TEXT`,
   ];
   for (const sql of migrations) {
     try {
@@ -390,22 +401,25 @@ async function initDB(db: D1Database, env: Env) {
       ];
 
       for (let i = 0; i < dishes.length; i++) {
+        const code = 'D' + String(i + 1).padStart(3, '0');
         await db.prepare(
-          `INSERT INTO cms_products (category, name, description, is_active, sort_order, updated_at)
-           VALUES (?, ?, ?, ?, ?, ?)`
-        ).bind("dish", dishes[i].name, dishes[i].desc, 1, i, now).run();
+          `INSERT INTO cms_products (category, product_code, name, description, is_active, sort_order, updated_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?)`
+        ).bind("dish", code, dishes[i].name, dishes[i].desc, 1, i, now).run();
       }
       for (let i = 0; i < soups.length; i++) {
+        const code = 'S' + String(i + 1).padStart(3, '0');
         await db.prepare(
-          `INSERT INTO cms_products (category, name, is_active, sort_order, updated_at)
-           VALUES (?, ?, ?, ?, ?)`
-        ).bind("soup", soups[i].name, 1, i, now).run();
+          `INSERT INTO cms_products (category, product_code, name, is_active, sort_order, updated_at)
+           VALUES (?, ?, ?, ?, ?, ?)`
+        ).bind("soup", code, soups[i].name, 1, i, now).run();
       }
       for (let i = 0; i < packages.length; i++) {
+        const code = 'P' + String(i + 1).padStart(3, '0');
         await db.prepare(
-          `INSERT INTO cms_products (category, name, price, is_active, sort_order, max_select, updated_at)
-           VALUES (?, ?, ?, ?, ?, ?, ?)`
-        ).bind("package", packages[i].name, packages[i].price, 1, i, packages[i].dishCount, now).run();
+          `INSERT INTO cms_products (category, product_code, name, price, is_active, sort_order, max_select, updated_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+        ).bind("package", code, packages[i].name, packages[i].price, 1, i, packages[i].dishCount, now).run();
       }
       console.log("[DB INIT] Default products seeded");
     }
@@ -751,14 +765,15 @@ app.post("/api/public/orders", async (c) => {
     console.log("[ORDER] Step 3: Inserting to DB");
     const result = await c.env.DB.prepare(
       `INSERT INTO order_records
-        (items, total_price, region, address, delivery_date, delivery_time, name, phone, email, remarks, referral_code, campaign_name, order_num, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        (items, total_price, region, address, estate, delivery_date, delivery_time, name, phone, email, remarks, referral_code, campaign_name, order_num, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
       .bind(
         JSON.stringify(items),
         totalPrice,
         body.region,
         body.address,
+        body.estate || null,
         body.deliveryDate,
         body.deliveryTime,
         body.name,
@@ -1004,6 +1019,37 @@ app.put("/api/public/admin/orders/:id", authMiddleware(), async (c) => {
   }
 });
 
+app.post("/api/public/admin/orders/:id/complete", authMiddleware(), async (c) => {
+  try {
+    const id = Number(c.req.param("id"));
+    const user = c.get("adminUser") as AdminUser;
+
+    const row = await c.env.DB.prepare(
+      `SELECT * FROM order_records WHERE id = ?`
+    ).bind(id).first();
+
+    if (!row) {
+      return jsonResponse({ error: "Order not found" }, 404);
+    }
+
+    if (row.payment_confirmed !== 1) {
+      return jsonResponse({ error: "Order must be paid before marking complete" }, 400);
+    }
+
+    await c.env.DB.prepare(
+      `UPDATE order_records SET order_completed = 1 WHERE id = ?`
+    ).bind(id).run();
+
+    c.executionCtx?.waitUntil(
+      logAudit(c.env.DB, user, "COMPLETE", "order", String(id), { orderNum: row.order_num })
+    );
+
+    return jsonResponse({ success: true, orderCompleted: 1 });
+  } catch (e) {
+    return jsonResponse({ error: "Failed to complete order" }, 500);
+  }
+});
+
 app.delete("/api/public/admin/orders/:id", authMiddleware(["super_admin", "admin"]), async (c) => {
   try {
     const id = Number(c.req.param("id"));
@@ -1113,11 +1159,23 @@ app.post("/api/public/admin/products", authMiddleware(), async (c) => {
     const user = c.get("adminUser") as AdminUser;
     const now = Math.floor(Date.now() / 1000);
 
+    // Auto-generate product code if not provided
+    let productCode = body.product_code || null;
+    if (!productCode && body.category) {
+      const prefix = body.category === 'dish' ? 'D' : body.category === 'soup' ? 'S' : 'P';
+      const { results } = await c.env.DB.prepare(
+        `SELECT COUNT(*) as count FROM cms_products WHERE category = ?`
+      ).bind(body.category).all();
+      const count = ((results?.[0] as any)?.count || 0) + 1;
+      productCode = prefix + String(count).padStart(3, '0');
+    }
+
     const result = await c.env.DB.prepare(
-      `INSERT INTO cms_products (category, name, description, price, original_price, is_active, stock_quantity, sort_order, image_url, max_select, updated_by, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      `INSERT INTO cms_products (category, product_code, name, description, price, original_price, is_active, stock_quantity, sort_order, image_url, max_select, updated_by, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     ).bind(
       body.category,
+      productCode,
       body.name,
       body.description || null,
       body.price || null,
@@ -1153,6 +1211,7 @@ app.put("/api/public/admin/products/:id", authMiddleware(), async (c) => {
     const values: any[] = [];
 
     if (body.name !== undefined) { setClause.push("name = ?"); values.push(body.name); }
+    if (body.product_code !== undefined) { setClause.push("product_code = ?"); values.push(body.product_code); }
     if (body.description !== undefined) { setClause.push("description = ?"); values.push(body.description); }
     if (body.price !== undefined) { setClause.push("price = ?"); values.push(body.price); }
     if (body.original_price !== undefined) { setClause.push("original_price = ?"); values.push(body.original_price); }
@@ -1223,7 +1282,7 @@ app.delete("/api/public/admin/products/:id", authMiddleware(["super_admin", "adm
 app.get("/api/public/products", async (c) => {
   try {
     const category = c.req.query("category");
-    let sql = `SELECT id, category, name, description, price, original_price, is_active, stock_quantity, sort_order, image_url, max_select FROM cms_products`;
+    let sql = `SELECT id, category, product_code, name, description, price, original_price, is_active, stock_quantity, sort_order, image_url, max_select FROM cms_products`;
     const params: any[] = [];
     if (category) {
       sql += ` WHERE category = ?`;
