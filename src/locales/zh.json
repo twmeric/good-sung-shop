@@ -1,0 +1,89 @@
+{
+  "nav": {
+    "language": "語言"
+  },
+  "languageLabel": {
+    "zh": "中文",
+    "en": "English"
+  },
+  "hero": {
+    "title": "好餸寶藏鍋",
+    "subtitle": "食出善意",
+    "description": "您的團年飯，讓SEN青年獲得工作機會，\n讓美味更有意義。",
+    "learnMore": "了解「好餸」"
+  },
+  "mission": {
+    "title": "滋味盤菜・暖心善行",
+    "description": "你的團年飯，不只團圓一家人，也在支持本地社企「好餸」，為 SEN 青年提供職業訓練與就業機會，支持共融社會！"
+  },
+  "socialProof": {
+    "title": "信心保證・各界認可",
+    "mediaReport": "媒體報導（社聯 × CTgoodjobs）",
+    "mediaTitle": "「社會企業-由音樂教育到創辦-好餸」",
+    "mediaDesc": "分享創辦人如何幫助SEN青年轉型，讓他們展現所長。",
+    "viewInterview": "查看完整專訪",
+    "officialCooperation": "官方合作認證（漁農處）",
+    "cooperationTitle": "好餸 × 漁農自然護理署認證夥伴",
+    "cooperationDesc": "本地優質食材 × SEN青年製作，信心保證。",
+    "watchVideo": "觀看合作影片",
+    "brandCollab": "品牌聯乘認證（獅球嘜 × uFood）",
+    "brandTitle": "獲得香港家傳戶曉的食油品牌認可",
+    "brandDesc": "獅球嘜聯乘好餸社企，推出健康餸菜包慈善義賣。",
+    "viewBrand": "查看報導",
+    "graduateReviews": "學員心聲",
+    "graduateTitle": "畢業學員好評",
+    "graduateDesc": "見證 SEN 青年的成長與轉變，您的支持是我們最大的動力。"
+  },
+  "pricing": {
+    "title": "節日寶藏鍋｜限時預訂",
+    "subtitle": "真材實料，用心製作",
+    "localMade": "香港本地製作",
+    "ingredients": "嚴選上等食材：鮑魚、原粒瑤柱、金蠔、發菜、冬菇、鴨掌、鮮蝦、燒鴨、洛神花豉油雞、南乳炆腩肉、沙爆豬皮、鬆軟蘿蔔、粉糯芋頭、嫩綠西蘭花",
+    "delivery": "已包港九新界送貨",
+    "shippingInfo": "所有價錢已包九龍送貨。送往港島或新界地區：如訂購 6 人寶藏鍋，需另加 HK$50 運費附加費；10 人及 12 人寶藏鍋照常包送貨。",
+    "size6": "6人寶藏鍋",
+    "price6": "788",
+    "size10": "10人寶藏鍋",
+    "price10": "988",
+    "size12": "12人寶藏鍋",
+    "price12": "1138"
+  },
+  "form": {
+    "title": "訂購表格",
+    "subtitle": "請填寫以下資料完成下單",
+    "selectProduct": "選擇寶藏鍋款式",
+    "quantity": "數量",
+    "region": "送貨地區",
+    "selectRegion": "請選擇送貨地區",
+    "hongKong": "港島",
+    "kowloon": "九龍",
+    "newTerritories": "新界",
+    "shippingFeeWarning": "港島及新界區訂購 6 人寶藏鍋需加 HK$50 運費",
+    "address": "送貨地址",
+    "addressPlaceholder": "大廈名稱及樓層",
+    "date": "送貨日期",
+    "dateWarning": "需提前 5 天預訂 | 新年休假期間 (2月17-22) 不提供配送",
+    "time": "時間段",
+    "selectTime": "請選擇時間",
+    "time1": "10:00 - 13:00",
+    "time2": "14:00 - 18:00",
+    "time3": "18:00 - 20:00",
+    "restrictedDayWarning": "2月16日只提供 10:00 - 13:00 時間段",
+    "name": "聯絡人姓名",
+    "whatsapp": "WhatsApp",
+    "phonePlaceholder": "電話號碼",
+    "email": "電郵（可選）",
+    "remarks": "備註",
+    "remarksPlaceholder": "如有特別要求（例如送貨時間限制、上落樓梯安排等），請在此註明",
+    "totalPrice": "總金額",
+    "submit": "立即下單，支持SEN青年",
+    "processing": "處理中...",
+    "submitError": "提交失敗，請稍後再試。",
+    "submitNetworkError": "提交失敗，請檢查網絡連接。",
+    "success": "好餸傳愛、多謝支持"
+  },
+  "footer": {
+    "copyright": "© 2024 Delicious Express 好餸. All rights reserved.",
+    "poweredBy": "Powered by"
+  }
+}

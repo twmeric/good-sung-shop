@@ -1,0 +1,29 @@
+name = "good-sung-shop"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+account_id = "dfbee5c2a5706a81bc04675499c933d4"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "good-sung-db"
+database_id = "23d6023a-c885-4887-9da5-c79eecbc29cd"
+
+[[kv_namespaces]]
+binding = "CMS_DATA"
+id = "2494ec74390a4baabe68f0de374d822b"
+
+[[r2_buckets]]
+binding = "PAYMENT_PROOFS"
+bucket_name = "payment-proofs"
+
+[vars]
+ADMIN_USERNAME = "admin"
+SITE_URL = "https://goodstore.jkdcoding.com"
+BUSINESS_PHONE = "85262322466"
+ADMIN_PHONE = "85298536993"
+
+# Secrets (set via wrangler secret put):
+# ADMIN_PASSWORD_HASH
+# CLOUDWAPI_API_KEY
+# CLOUDWAPI_SENDER
+# ADMIN_TOKEN_SECRET
